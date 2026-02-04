@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from models import Account, Transaction, EmailCheckpoint, Cycle
+from .models import Account, Transaction, EmailCheckpoint, Cycle
 
 # Database configuration
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://transactsync:transactsync@localhost:5432/transactsync")

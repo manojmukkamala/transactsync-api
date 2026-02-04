@@ -1,7 +1,8 @@
 from datetime import datetime
+from typing import List
 
 from pydantic import BaseModel, ConfigDict
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, SQLModel, UniqueConstraint
 
 
 # Database models for PostgreSQL
@@ -38,6 +39,9 @@ class Transaction(SQLModel, table=True):
     load_by: str | None = None
 
 class EmailCheckpoint(SQLModel, table=True):
+    __table_args__ = (
+        UniqueConstraint("folder"),
+    )    
     id: int | None = Field(default=None, primary_key=True)
     folder: str
     last_seen_uid: int
@@ -98,6 +102,23 @@ class AccountResponse(BaseModel):
     load_by: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+class CheckpointRequest(BaseModel):
+    last_seen_uid: int
+
+class CheckpointCreate(BaseModel):
+    folder: str
+    last_seen_uid: int
+
+class CheckpointResponse(BaseModel):
+    id: int | None = None
+    folder: str
+    last_seen_uid: int | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+class CheckpointsListResponse(BaseModel):
+    checkpoints: List[CheckpointResponse]
 
 class CycleRequest(BaseModel):
     cycle_start: datetime

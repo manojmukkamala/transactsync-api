@@ -6,8 +6,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import select
 
-from db import get_async_session, init_db
-from models import Account, AccountRequest, AccountResponse
+from .db import get_async_session, init_db
+from .models import Account, AccountRequest, AccountResponse, EmailCheckpoint, CheckpointRequest, CheckpointCreate, CheckpointResponse, CheckpointsListResponse
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -57,7 +57,7 @@ async def root() -> dict:
         "description": "AI powered Python app to log financial transactions by parsing email alerts"
     }
 
-# Account endpoints
+# accounts endpoints
 @app.post("/accounts", tags=["Accounts"])
 async def create_account(account: AccountRequest) -> AccountResponse:
     """
@@ -150,7 +150,107 @@ async def delete_account(account_id: int) -> dict:
         await session.commit()
         return {"status": "success", "message": "Account deleted"}
 
+# email_checkpoints endpoints
+@app.get("/email_checkpoints/{folder}", tags=["EmailCheckpoints"], response_model=CheckpointResponse)
+async def get_last_seen_uid(folder: str) -> CheckpointResponse:
+    """
+    Retrieve the last seen email UID for a specific folder.
+    Returns:
+        CheckpointResponse: Checkpoint data with folder and last_seen_uid
+    """
+    async with get_async_session() as session:
+        statement = select(EmailCheckpoint).where(EmailCheckpoint.folder == folder)
+        result = await session.execute(statement)
+        cp = result.scalars().one_or_none()
+        if cp:
+            return CheckpointResponse.model_validate(cp)
+        else:
+            return CheckpointResponse(folder=folder, last_seen_uid=None)
+
+@app.put("/email_checkpoints/{folder}", tags=["EmailCheckpoints"], response_model=CheckpointResponse)
+async def set_last_seen_uid(folder: str, payload: CheckpointRequest) -> CheckpointResponse:
+    """
+    Update or insert the last seen email UID for a specific folder.
+    Body:
+        payload.last_seen_uid (int): UID to store
+    Returns:
+        CheckpointResponse: Updated checkpoint data
+    """
+    async with get_async_session() as session:
+        statement = select(EmailCheckpoint).where(EmailCheckpoint.folder == folder)
+        result = await session.execute(statement)
+        cp = result.scalars().one_or_none()
+
+        if cp:
+            cp.last_seen_uid = payload.last_seen_uid
+            await session.commit()
+            await session.refresh(cp)
+            return CheckpointResponse.model_validate(cp)
+        else:
+            cp = EmailCheckpoint(folder=folder, last_seen_uid=payload.last_seen_uid)
+            session.add(cp)
+            await session.commit()
+            await session.refresh(cp)
+            return CheckpointResponse.model_validate(cp)
+
+@app.post("/email_checkpoints", tags=["EmailCheckpoints"], response_model=CheckpointResponse)
+async def create_email_checkpoint(payload: CheckpointCreate) -> CheckpointResponse:
+    """
+    Create a new email checkpoint or update if exists.
+    Body: {"folder": str, "last_seen_uid": int}
+    Returns:
+        CheckpointResponse: Created/updated checkpoint data
+    """
+    async with get_async_session() as session:
+        # check if already exists
+        statement = select(EmailCheckpoint).where(EmailCheckpoint.folder == payload.folder)
+        result = await session.execute(statement)
+        existing = result.scalars().one_or_none()
+        if existing:
+            # If exists, update value and return
+            existing.last_seen_uid = payload.last_seen_uid
+            await session.commit()
+            await session.refresh(existing)
+            return CheckpointResponse.model_validate(existing)
+
+        cp = EmailCheckpoint(folder=payload.folder, last_seen_uid=payload.last_seen_uid)
+        session.add(cp)
+        await session.commit()
+        await session.refresh(cp)
+        return CheckpointResponse.model_validate(cp)
+
+@app.get("/email_checkpoints", tags=["EmailCheckpoints"], response_model=CheckpointsListResponse)
+async def get_all_email_checkpoints() -> CheckpointsListResponse:
+    """
+    Get all email checkpoints.
+    Returns:
+        CheckpointsListResponse: List of all checkpoints
+    """
+    async with get_async_session() as session:
+        statement = select(EmailCheckpoint)
+        result = await session.execute(statement)
+        checkpoints = result.scalars().all()
+        return CheckpointsListResponse(
+            checkpoints=[CheckpointResponse.model_validate(cp) for cp in checkpoints]
+        )
+
+@app.delete("/email_checkpoints/{folder}", tags=["EmailCheckpoints"])
+async def delete_email_checkpoint(folder: str) -> dict:
+    """
+    Delete an email checkpoint by folder.
+    Returns a status dict.
+    """
+    async with get_async_session() as session:
+        statement = select(EmailCheckpoint).where(EmailCheckpoint.folder == folder)
+        result = await session.execute(statement)
+        cp = result.scalars().one_or_none()
+        if not cp:
+            raise HTTPException(status_code=404, detail="Email checkpoint not found")
+        await session.delete(cp)
+        await session.commit()
+        return {"status": "success", "message": f"Checkpoint for folder {folder} deleted"}
+
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
