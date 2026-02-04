@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import select
 
-from database import get_async_session, init_db
+from db import get_async_session, init_db
 from models import Account, AccountRequest, AccountResponse
 
 # Initialize FastAPI app
