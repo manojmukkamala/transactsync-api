@@ -19,6 +19,9 @@ from .models import (
     CycleRequest,
     CycleResponse,
     CycleIdResponse,
+    Transaction,
+    TransactionRequest,
+    TransactionResponse,
 )
 from datetime import datetime
 
@@ -332,6 +335,79 @@ async def delete_email_checkpoint(folder: str) -> dict:
         await session.delete(cp)
         await session.commit()
         return {"status": "success", "message": f"Checkpoint for folder {folder} deleted"}
+
+
+# Transaction endpoints
+@app.post("/transactions", tags=["Transactions"], response_model=TransactionResponse)
+async def create_transaction(payload: TransactionRequest) -> TransactionResponse:
+    """
+    Create a new transaction.
+    """
+    async with get_async_session() as session:
+        txn = Transaction(**payload.model_dump())
+        session.add(txn)
+        await session.commit()
+        await session.refresh(txn)
+        return TransactionResponse.model_validate(txn)
+
+@app.get("/transactions", tags=["Transactions"], response_model=List[TransactionResponse])
+async def get_transactions() -> List[TransactionResponse]:
+    """
+    Get all transactions.
+    """
+    async with get_async_session() as session:
+        statement = select(Transaction)
+        result = await session.execute(statement)
+        transactions = result.scalars().all()
+        return [TransactionResponse.model_validate(t) for t in transactions]
+
+@app.get("/transactions/{transaction_id}", tags=["Transactions"], response_model=TransactionResponse)
+async def get_transaction(transaction_id: int) -> TransactionResponse:
+    """
+    Get a transaction by ID.
+    """
+    async with get_async_session() as session:
+        statement = select(Transaction).where(Transaction.transaction_id == transaction_id)
+        result = await session.execute(statement)
+        txn = result.scalars().one_or_none()
+        if not txn:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+        return TransactionResponse.model_validate(txn)
+
+@app.put("/transactions/{transaction_id}", tags=["Transactions"], response_model=TransactionResponse)
+async def update_transaction(transaction_id: int, payload: TransactionRequest) -> TransactionResponse:
+    """
+    Update a transaction.
+    """
+    async with get_async_session() as session:
+        statement = select(Transaction).where(Transaction.transaction_id == transaction_id)
+        result = await session.execute(statement)
+        txn = result.scalars().one_or_none()
+        if not txn:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+
+        for key, value in payload.model_dump().items():
+            if hasattr(txn, key):
+                setattr(txn, key, value)
+
+        await session.commit()
+        await session.refresh(txn)
+        return TransactionResponse.model_validate(txn)
+
+@app.delete("/transactions/{transaction_id}", tags=["Transactions"])
+async def delete_transaction(transaction_id: int) -> dict:
+    """
+    Delete a transaction.
+    """
+    async with get_async_session() as session:
+        statement = select(Transaction).where(Transaction.transaction_id == transaction_id)
+        result = await session.execute(statement)
+        txn = result.scalars().one_or_none()
+        if not txn:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+        await session.delete(txn)
+        await session.commit()
+        return {"status": "success", "message": "Transaction deleted"}
 
 
 if __name__ == "__main__":

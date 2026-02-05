@@ -21,13 +21,13 @@ class Transaction(SQLModel, table=True):
     transaction_id: int | None = Field(default=None, primary_key=True)
     transaction_date: datetime
     transaction_amount: float
-    merchant: str
+    merchant: str | None = None
     account_id: int = Field(foreign_key="account.account_id")
     expense_owner: str | None = None
-    from_address: str
-    to_address: str
-    email_uid: int
-    email_date: datetime
+    from_address: str | None = None
+    to_address: str | None = None
+    email_uid: int | None = None
+    email_date: datetime | None = None
     llm_reasoning: str | None = None
     is_deleted: bool = False
     comment: str | None = None
@@ -82,7 +82,8 @@ class TransactionResponse(BaseModel):
     email_date: datetime
     transaction_type: str | None = None
     cycle_id: int | None = None
-    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 class AccountRequest(BaseModel):
     account_number: str

@@ -172,3 +172,73 @@ curl -X GET "http://127.0.0.1:8000/cycles/for-date?transaction_date=2026-01-15T1
 # Example response when not found:
 # {"cycle_id":null}
 ```
+
+
+## transactions
+
+### GET (all)
+
+```sh
+curl -X GET "http://127.0.0.1:8000/transactions" -H "accept: application/json" | jq
+# Example response:
+# [{"transaction_id":1,"transaction_date":"2026-01-15T10:30:00","transaction_amount":150.0,"merchant":"Starbucks","account_id":1,"from_address":"noreply@starbucks.com","to_address":"user@example.com","email_uid":100,"email_date":"2026-01-15T10:30:00","transaction_type":"purchase","cycle_id":1,...}]
+```
+
+### POST (create)
+
+```sh
+curl -X POST "http://127.0.0.1:8000/transactions" \
+  -H "accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "transaction_date": "2026-01-15T10:30:00",
+    "transaction_amount": 150.00,
+    "merchant": "Starbucks",
+    "account_id": 1,
+    "from_address": "noreply@starbucks.com",
+    "to_address": "user@example.com",
+    "email_uid": 100,
+    "email_date": "2026-01-15T10:30:00",
+    "transaction_type": "purchase",
+    "cycle_id": 1
+  }' | jq
+# Example response:
+# {"transaction_id":1,"transaction_date":"2026-01-15T10:30:00","transaction_amount":150.0,"merchant":"Starbucks","account_id":1,"from_address":"noreply@starbucks.com","to_address":"user@example.com","email_uid":100,"email_date":"2026-01-15T10:30:00","transaction_type":"purchase","cycle_id":1,...}
+```
+
+### GET (by id)
+
+```sh
+curl -X GET "http://127.0.0.1:8000/transactions/1" -H "accept: application/json" | jq
+# Example response:
+# {"transaction_id":1,"transaction_date":"2026-01-15T10:30:00","transaction_amount":150.0,"merchant":"Starbucks","account_id":1,"from_address":"noreply@starbucks.com","to_address":"user@example.com","email_uid":100,"email_date":"2026-01-15T10:30:00","transaction_type":"purchase","cycle_id":1,...}
+```
+
+### PUT
+
+```sh
+curl -X PUT "http://127.0.0.1:8000/transactions/1" \
+  -H "accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "transaction_date": "2026-01-15T10:30:00",
+    "transaction_amount": 175.00,
+    "merchant": "Starbucks",
+    "account_id": 1,
+    "from_address": "noreply@starbucks.com",
+    "to_address": "user@example.com",
+    "email_uid": 100,
+    "email_date": "2026-01-15T10:30:00",
+    "transaction_type": "purchase",
+    "cycle_id": 1
+  }' | jq
+# Example response: same as GET but with updated fields
+```
+
+### DELETE
+
+```sh
+curl -X DELETE "http://127.0.0.1:8000/transactions/1" -H "accept: application/json" | jq
+# Example response:
+# {"status":"success","message":"Transaction deleted"}
+```
