@@ -14,7 +14,7 @@ class Account(SQLModel, table=True):
     account_owner: str | None = None
     active: bool = True
     comments: str | None = None
-    load_time: datetime | None = None
+    load_time: datetime = Field(default_factory=datetime.utcnow)
     load_by: str | None = None
 
 class Transaction(SQLModel, table=True):
@@ -35,7 +35,7 @@ class Transaction(SQLModel, table=True):
     updated_at: datetime | None = None
     transaction_type: str | None = None
     cycle_id: int | None = Field(default=None, foreign_key="cycle.cycle_id")
-    load_time: datetime | None = None
+    load_time: datetime = Field(default_factory=datetime.utcnow)
     load_by: str | None = None
 
 class EmailCheckpoint(SQLModel, table=True):
@@ -45,7 +45,8 @@ class EmailCheckpoint(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     folder: str
     last_seen_uid: int
-    load_time: datetime | None = None
+    load_time: datetime = Field(default_factory=datetime.utcnow)
+    load_by: str | None = None
 
 class Cycle(SQLModel, table=True):
     cycle_id: int | None = Field(default=None, primary_key=True)
@@ -53,8 +54,8 @@ class Cycle(SQLModel, table=True):
     cycle_end: datetime
     cycle_description: str | None = None
     comments: str | None = None
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
+    load_time: datetime = Field(default_factory=datetime.utcnow)
+    load_by: str | None = None
 
 # API request/response models
 class TransactionRequest(BaseModel):
@@ -98,8 +99,6 @@ class AccountResponse(BaseModel):
     account_owner: str | None = None
     active: bool = True
     comments: str | None = None
-    load_time: datetime | None = None
-    load_by: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -117,9 +116,6 @@ class CheckpointResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-class CheckpointsListResponse(BaseModel):
-    checkpoints: List[CheckpointResponse]
-
 class CycleRequest(BaseModel):
     cycle_start: datetime
     cycle_end: datetime
@@ -132,5 +128,8 @@ class CycleResponse(BaseModel):
     cycle_end: datetime
     cycle_description: str | None = None
     comments: str | None = None
-    created_at: datetime
-    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+class CycleIdResponse(BaseModel):
+    cycle_id: int | None = None

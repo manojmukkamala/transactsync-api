@@ -7,7 +7,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import select
 
 from .db import get_async_session, init_db
-from .models import Account, AccountRequest, AccountResponse, EmailCheckpoint, CheckpointRequest, CheckpointCreate, CheckpointResponse, CheckpointsListResponse
+from .models import (
+    Account,
+    AccountRequest,
+    AccountResponse,
+    EmailCheckpoint,
+    CheckpointRequest,
+    CheckpointCreate,
+    CheckpointResponse,
+    Cycle,
+    CycleRequest,
+    CycleResponse,
+    CycleIdResponse,
+)
+from datetime import datetime
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -57,8 +70,9 @@ async def root() -> dict:
         "description": "AI powered Python app to log financial transactions by parsing email alerts"
     }
 
+
 # accounts endpoints
-@app.post("/accounts", tags=["Accounts"])
+@app.post("/accounts", tags=["Accounts"], response_model=AccountResponse)
 async def create_account(account: AccountRequest) -> AccountResponse:
     """
     Create a new account.
@@ -150,6 +164,77 @@ async def delete_account(account_id: int) -> dict:
         await session.commit()
         return {"status": "success", "message": "Account deleted"}
 
+
+# Cycle endpoints
+@app.post("/cycles", tags=["Cycles"], response_model=CycleResponse)
+async def create_cycle(payload: CycleRequest) -> CycleResponse:
+    async with get_async_session() as session:
+        cyc = Cycle(**payload.model_dump())
+        session.add(cyc)
+        await session.commit()
+        await session.refresh(cyc)
+        return CycleResponse.model_validate(cyc)
+
+@app.get("/cycles", tags=["Cycles"], response_model=List[CycleResponse])
+async def get_cycles() -> List[CycleResponse]:
+    async with get_async_session() as session:
+        statement = select(Cycle)
+        result = await session.execute(statement)
+        cycles = result.scalars().all()
+        return [CycleResponse.model_validate(c) for c in cycles]
+
+@app.get("/cycles/for-date", tags=["Cycles"], response_model=CycleIdResponse)
+async def get_cycle_id_for_date(transaction_date: datetime) -> CycleIdResponse:
+    """
+    Return the `cycle_id` that contains the given transaction_date.
+    Accepts an ISO datetime as query parameter `transaction_date`.
+    """
+    async with get_async_session() as session:
+        statement = select(Cycle).where(Cycle.cycle_start <= transaction_date, Cycle.cycle_end >= transaction_date).limit(1)
+        result = await session.execute(statement)
+        cyc = result.scalars().one_or_none()
+        return CycleIdResponse(cycle_id=cyc.cycle_id if cyc else None)
+
+@app.get("/cycles/{cycle_id}", tags=["Cycles"], response_model=CycleResponse)
+async def get_cycle(cycle_id: int) -> CycleResponse:
+    async with get_async_session() as session:
+        statement = select(Cycle).where(Cycle.cycle_id == cycle_id)
+        result = await session.execute(statement)
+        cyc = result.scalars().one_or_none()
+        if not cyc:
+            raise HTTPException(status_code=404, detail="Cycle not found")
+        return CycleResponse.model_validate(cyc)
+
+@app.put("/cycles/{cycle_id}", tags=["Cycles"], response_model=CycleResponse)
+async def update_cycle(cycle_id: int, payload: CycleRequest) -> CycleResponse:
+    async with get_async_session() as session:
+        statement = select(Cycle).where(Cycle.cycle_id == cycle_id)
+        result = await session.execute(statement)
+        cyc = result.scalars().one_or_none()
+        if not cyc:
+            raise HTTPException(status_code=404, detail="Cycle not found")
+
+        for key, value in payload.model_dump().items():
+            if hasattr(cyc, key):
+                setattr(cyc, key, value)
+
+        await session.commit()
+        await session.refresh(cyc)
+        return CycleResponse.model_validate(cyc)
+
+@app.delete("/cycles/{cycle_id}", tags=["Cycles"])
+async def delete_cycle(cycle_id: int) -> dict:
+    async with get_async_session() as session:
+        statement = select(Cycle).where(Cycle.cycle_id == cycle_id)
+        result = await session.execute(statement)
+        cyc = result.scalars().one_or_none()
+        if not cyc:
+            raise HTTPException(status_code=404, detail="Cycle not found")
+        await session.delete(cyc)
+        await session.commit()
+        return {"status": "success", "message": "Cycle deleted"}
+
+
 # email_checkpoints endpoints
 @app.get("/email_checkpoints/{folder}", tags=["EmailCheckpoints"], response_model=CheckpointResponse)
 async def get_last_seen_uid(folder: str) -> CheckpointResponse:
@@ -219,20 +304,18 @@ async def create_email_checkpoint(payload: CheckpointCreate) -> CheckpointRespon
         await session.refresh(cp)
         return CheckpointResponse.model_validate(cp)
 
-@app.get("/email_checkpoints", tags=["EmailCheckpoints"], response_model=CheckpointsListResponse)
-async def get_all_email_checkpoints() -> CheckpointsListResponse:
+@app.get("/email_checkpoints", tags=["EmailCheckpoints"], response_model=List[CheckpointResponse])
+async def get_all_email_checkpoints() -> List[CheckpointResponse]:
     """
     Get all email checkpoints.
     Returns:
-        CheckpointsListResponse: List of all checkpoints
+        List[CheckpointResponse]: List of all checkpoints
     """
     async with get_async_session() as session:
         statement = select(EmailCheckpoint)
         result = await session.execute(statement)
         checkpoints = result.scalars().all()
-        return CheckpointsListResponse(
-            checkpoints=[CheckpointResponse.model_validate(cp) for cp in checkpoints]
-        )
+        return [CheckpointResponse.model_validate(cp) for cp in checkpoints]
 
 @app.delete("/email_checkpoints/{folder}", tags=["EmailCheckpoints"])
 async def delete_email_checkpoint(folder: str) -> dict:
