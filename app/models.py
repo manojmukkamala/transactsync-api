@@ -14,6 +14,7 @@ class Account(SQLModel, table=True):
     account_owner: str | None = None
     active: bool = True
     comments: str | None = None
+    account_type: str | None = None
     load_time: datetime = Field(default_factory=datetime.utcnow)
     load_by: str | None = None
 
@@ -91,6 +92,10 @@ class AccountRequest(BaseModel):
     account_name: str
     account_owner: str | None = None
     comments: str | None = None
+    active: bool = True
+    account_type: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
 
 class AccountResponse(BaseModel):
     account_id: int
@@ -134,3 +139,8 @@ class CycleResponse(BaseModel):
 
 class CycleIdResponse(BaseModel):
     cycle_id: int | None = None
+
+class AccountIdResponse(BaseModel):
+    account_id: int | None = None
+
+    model_config = ConfigDict(from_attributes=True)

@@ -8,6 +8,17 @@
 curl -X 'GET' 'http://127.0.0.1:8000/accounts/1'  -H 'accept: application/json'  | jq 
 ```
 
+### GET by account number
+Get account_id by account_number:
+
+```sh
+curl -X 'GET' 'http://127.0.0.1:8000/accounts/by-number?account_number=007'  -H 'accept: application/json'  | jq 
+# Example response when account exists:
+# {"account_id": 12}
+# Example response when account doesn't exist:
+# {"account_id": null}
+```
+
 ### PUT
 ```sh
 curl -X 'PUT' 'http://127.0.0.1:8000/accounts/1' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{"account_number": "22222222","financial_institution": "Test Bank","account_name": "Updated Test Account","account_owner": "Jane Doe"}' | jq

@@ -11,6 +11,7 @@ from .models import (
     Account,
     AccountRequest,
     AccountResponse,
+    AccountIdResponse,
     EmailCheckpoint,
     CheckpointRequest,
     CheckpointCreate,
@@ -104,6 +105,24 @@ async def get_accounts() -> List[AccountResponse]:
         accounts = result.scalars().all()  # extract the Account objects
         return [AccountResponse.model_validate(acc) for acc in accounts]
 
+@app.get("/accounts/by-number", tags=["Accounts"], response_model=AccountIdResponse)
+async def get_account_id_by_account_number(account_number: str) -> AccountIdResponse:
+    """
+    Resolve account_id by account_number via API.
+    Args:
+        account_number: The account number to look up
+    Returns:
+        AccountIdResponse with account_id
+    """
+    async with get_async_session() as session:
+        statement = select(Account).where(Account.account_number == account_number)
+        result = await session.execute(statement)
+        account = result.scalars().one_or_none()
+        if account:
+            return AccountIdResponse(account_id=account.account_id)
+        else:
+            return AccountIdResponse(account_id=None)
+            
 @app.get("/accounts/{account_id}", tags=["Accounts"], response_model=AccountResponse)
 async def get_account(account_id: int) -> AccountResponse:
     """
@@ -166,7 +185,6 @@ async def delete_account(account_id: int) -> dict:
         await session.delete(db_account)
         await session.commit()
         return {"status": "success", "message": "Account deleted"}
-
 
 # Cycle endpoints
 @app.post("/cycles", tags=["Cycles"], response_model=CycleResponse)
