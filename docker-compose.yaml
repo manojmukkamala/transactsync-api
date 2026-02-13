@@ -1,0 +1,10 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:16
+    environment:
+      - POSTGRES_DB=transactsync
+      - POSTGRES_USER=transactsync
+      - POSTGRES_PASSWORD=transactsync
+    ports:
+      - "5432:5432"
