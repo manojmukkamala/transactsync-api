@@ -201,7 +201,7 @@ Filter transactions by date range and/or cycle_id:
 
 ```sh
 # Get transactions between two dates
-curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/transactions?start_date=2026-01-01T00:00:00&end_date=2026-01-31T23:59:59" -H "accept: application/json" | jq
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/transactions?start_date=2026-02-12&end_date=2026-02-13" -H "accept: application/json" | jq
 
 # Get transactions for a specific cycle
 curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/transactions?cycle_id=1" -H "accept: application/json" | jq

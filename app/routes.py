@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import FastAPI, HTTPException, Security
 from fastapi.middleware.cors import CORSMiddleware
@@ -419,8 +419,8 @@ async def create_transaction(payload: TransactionRequest) -> TransactionResponse
     '/transactions', tags=['Transactions'], response_model=list[TransactionResponse]
 )
 async def get_transactions(
-    start_date: datetime | None = None,
-    end_date: datetime | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
     cycle_id: int | None = None,
 ) -> list[TransactionResponse]:
     """
@@ -432,9 +432,11 @@ async def get_transactions(
 
         # Apply filters if provided
         if start_date is not None:
-            statement = statement.where(Transaction.transaction_date >= start_date)
+            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')  # noqa: DTZ007
+            statement = statement.where(Transaction.transaction_date >= start_date_obj)
         if end_date is not None:
-            statement = statement.where(Transaction.transaction_date <= end_date)
+            end_date_obj = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)  # noqa: DTZ007
+            statement = statement.where(Transaction.transaction_date <= end_date_obj)
         if cycle_id is not None:
             statement = statement.where(Transaction.cycle_id == cycle_id)
 
