@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 from pydantic import BaseModel, ConfigDict
 from sqlmodel import Field, SQLModel, UniqueConstraint
@@ -18,12 +17,13 @@ class Account(SQLModel, table=True):
     load_time: datetime = Field(default_factory=datetime.utcnow)
     load_by: str | None = None
 
+
 class Transaction(SQLModel, table=True):
     transaction_id: int | None = Field(default=None, primary_key=True)
     transaction_date: datetime
     transaction_amount: float
     merchant: str | None = None
-    account_id: int = Field(foreign_key="account.account_id")
+    account_id: int = Field(foreign_key='account.account_id')
     expense_owner: str | None = None
     from_address: str | None = None
     to_address: str | None = None
@@ -35,19 +35,19 @@ class Transaction(SQLModel, table=True):
     updated_by: str | None = None
     updated_at: datetime | None = None
     transaction_type: str | None = None
-    cycle_id: int | None = Field(default=None, foreign_key="cycle.cycle_id")
+    cycle_id: int | None = Field(default=None, foreign_key='cycle.cycle_id')
     load_time: datetime = Field(default_factory=datetime.utcnow)
     load_by: str | None = None
 
+
 class EmailCheckpoint(SQLModel, table=True):
-    __table_args__ = (
-        UniqueConstraint("folder"),
-    )    
+    __table_args__ = (UniqueConstraint('folder'),)
     id: int | None = Field(default=None, primary_key=True)
     folder: str
     last_seen_uid: int
     load_time: datetime = Field(default_factory=datetime.utcnow)
     load_by: str | None = None
+
 
 class Cycle(SQLModel, table=True):
     cycle_id: int | None = Field(default=None, primary_key=True)
@@ -57,6 +57,7 @@ class Cycle(SQLModel, table=True):
     comments: str | None = None
     load_time: datetime = Field(default_factory=datetime.utcnow)
     load_by: str | None = None
+
 
 # API request/response models
 class TransactionRequest(BaseModel):
@@ -70,6 +71,7 @@ class TransactionRequest(BaseModel):
     email_date: datetime
     transaction_type: str | None = None
     cycle_id: int | None = None
+
 
 class TransactionResponse(BaseModel):
     transaction_id: int
@@ -86,6 +88,7 @@ class TransactionResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class AccountRequest(BaseModel):
     account_number: str
     financial_institution: str
@@ -96,6 +99,7 @@ class AccountRequest(BaseModel):
     account_type: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class AccountResponse(BaseModel):
     account_id: int
@@ -108,12 +112,15 @@ class AccountResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class CheckpointRequest(BaseModel):
     last_seen_uid: int
+
 
 class CheckpointCreate(BaseModel):
     folder: str
     last_seen_uid: int
+
 
 class CheckpointResponse(BaseModel):
     id: int | None = None
@@ -122,11 +129,13 @@ class CheckpointResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class CycleRequest(BaseModel):
     cycle_start: datetime
     cycle_end: datetime
     cycle_description: str | None = None
     comments: str | None = None
+
 
 class CycleResponse(BaseModel):
     cycle_id: int
@@ -137,8 +146,10 @@ class CycleResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class CycleIdResponse(BaseModel):
     cycle_id: int | None = None
+
 
 class AccountIdResponse(BaseModel):
     account_id: int | None = None
