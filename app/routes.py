@@ -2,7 +2,8 @@ import logging
 
 from typing import List
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Security
+from .security import get_api_key
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import select
 
@@ -30,16 +31,17 @@ from datetime import datetime
 app = FastAPI(
     title="TransactSync API",
     description="API for financial transaction synchronization from email alerts",
-    version="1.0.0"
+    version="1.0.0",
+    dependencies=[Security(get_api_key)],
 )
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, restrict this to specific origins
+    allow_origins=["127.0.0.1"],  # In production, restrict this to specific origins
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 # Create database tables

@@ -5,14 +5,14 @@
 ### GET
 
 ```sh
-curl -X 'GET' 'http://127.0.0.1:8000/accounts/1'  -H 'accept: application/json'  | jq 
+curl -H "x-api-key: super-secret" -X 'GET' 'http://127.0.0.1:8000/accounts/1'  -H 'accept: application/json'  | jq 
 ```
 
 ### GET by account number
 Get account_id by account_number:
 
 ```sh
-curl -X 'GET' 'http://127.0.0.1:8000/accounts/by-number?account_number=007'  -H 'accept: application/json'  | jq 
+curl -H "x-api-key: super-secret" -X 'GET' 'http://127.0.0.1:8000/accounts/by-number?account_number=007'  -H 'accept: application/json'  | jq 
 # Example response when account exists:
 # {"account_id": 12}
 # Example response when account doesn't exist:
@@ -21,9 +21,9 @@ curl -X 'GET' 'http://127.0.0.1:8000/accounts/by-number?account_number=007'  -H 
 
 ### PUT
 ```sh
-curl -X 'PUT' 'http://127.0.0.1:8000/accounts/1' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{"account_number": "22222222","financial_institution": "Test Bank","account_name": "Updated Test Account","account_owner": "Jane Doe"}' | jq
+curl -H "x-api-key: super-secret" -X 'PUT' 'http://127.0.0.1:8000/accounts/1' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{"account_number": "22222222","financial_institution": "Test Bank","account_name": "Updated Test Account","account_owner": "Jane Doe"}' | jq
 
-curl -X 'PUT' \
+curl -H "x-api-key: super-secret" -X 'PUT' \
   'http://127.0.0.1:8000/accounts/1' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
@@ -39,7 +39,7 @@ curl -X 'PUT' \
 Create a new account:
 
 ```sh
-curl -X POST "http://127.0.0.1:8000/accounts" \
+curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/accounts" \
   -H "accept: application/json" \
   -H "Content-Type: application/json" \
   -d '{
@@ -54,7 +54,7 @@ curl -X POST "http://127.0.0.1:8000/accounts" \
 
 ### DELETE
 ```sh
-curl -X 'DELETE' 'http://127.0.0.1:8000/accounts/1' -H 'accept: application/json' | jq
+curl -H "x-api-key: super-secret" -X 'DELETE' 'http://127.0.0.1:8000/accounts/1' -H 'accept: application/json' | jq
 ```
 
 
@@ -64,7 +64,7 @@ curl -X 'DELETE' 'http://127.0.0.1:8000/accounts/1' -H 'accept: application/json
 Get all email checkpoints:
 
 ```sh
-curl -X GET "http://127.0.0.1:8000/email_checkpoints" -H "accept: application/json" | jq
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/email_checkpoints" -H "accept: application/json" | jq
 # Example response:
 # {"checkpoints":[{"id":1,"folder":"INBOX","last_seen_uid":12345},...]}
 ```
@@ -72,7 +72,7 @@ curl -X GET "http://127.0.0.1:8000/email_checkpoints" -H "accept: application/js
 Get the last seen UID for a specific folder `INBOX` (returns null if not found):
 
 ```sh
-curl -X GET "http://127.0.0.1:8000/email_checkpoints/INBOX" -H "accept: application/json" | jq
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/email_checkpoints/INBOX" -H "accept: application/json" | jq
 # Example response when exists:
 # {"id":1,"folder":"INBOX","last_seen_uid":12345}
 # Example response when not found:
@@ -83,7 +83,7 @@ curl -X GET "http://127.0.0.1:8000/email_checkpoints/INBOX" -H "accept: applicat
 Set/update the last seen UID for folder `INBOX`:
 
 ```sh
-curl -X PUT "http://127.0.0.1:8000/email_checkpoints/INBOX" \
+curl -H "x-api-key: super-secret" -X PUT "http://127.0.0.1:8000/email_checkpoints/INBOX" \
   -H "accept: application/json" \
   -H "Content-Type: application/json" \
   -d '{"last_seen_uid": 12345}' | jq
@@ -95,7 +95,7 @@ curl -X PUT "http://127.0.0.1:8000/email_checkpoints/INBOX" \
 Create a new email checkpoint:
 
 ```sh
-curl -X POST "http://127.0.0.1:8000/email_checkpoints" \
+curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/email_checkpoints" \
   -H "accept: application/json" \
   -H "Content-Type: application/json" \
   -d '{
@@ -110,7 +110,7 @@ curl -X POST "http://127.0.0.1:8000/email_checkpoints" \
 Delete the checkpoint for a folder:
 
 ```sh
-curl -X DELETE "http://127.0.0.1:8000/email_checkpoints/INBOX" -H "accept: application/json" | jq
+curl -H "x-api-key: super-secret" -X DELETE "http://127.0.0.1:8000/email_checkpoints/INBOX" -H "accept: application/json" | jq
 # Example response:
 # {"status":"success","message":"Checkpoint for folder INBOX deleted"}
 ```
@@ -121,7 +121,7 @@ curl -X DELETE "http://127.0.0.1:8000/email_checkpoints/INBOX" -H "accept: appli
 ### GET (all)
 
 ```sh
-curl -X GET "http://127.0.0.1:8000/cycles" -H "accept: application/json" | jq
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/cycles" -H "accept: application/json" | jq
 # Example response:
 # [{"cycle_id":1,"cycle_start":"2026-01-01T00:00:00","cycle_end":"2026-01-31T23:59:59","cycle_description":null,"comments":null,"created_at":null,"updated_at":null}]
 ```
@@ -129,7 +129,7 @@ curl -X GET "http://127.0.0.1:8000/cycles" -H "accept: application/json" | jq
 ### POST (create)
 
 ```sh
-curl -X POST "http://127.0.0.1:8000/cycles" \
+curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/cycles" \
   -H "accept: application/json" \
   -H "Content-Type: application/json" \
   -d '{
@@ -145,7 +145,7 @@ curl -X POST "http://127.0.0.1:8000/cycles" \
 ### GET (by id)
 
 ```sh
-curl -X GET "http://127.0.0.1:8000/cycles/1" -H "accept: application/json" | jq
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/cycles/1" -H "accept: application/json" | jq
 # Example response:
 # {"cycle_id":1,"cycle_start":"2026-01-01T00:00:00","cycle_end":"2026-01-31T23:59:59","cycle_description":"January cycle","comments":"Auto-created","created_at":null,"updated_at":null}
 ```
@@ -153,7 +153,7 @@ curl -X GET "http://127.0.0.1:8000/cycles/1" -H "accept: application/json" | jq
 ### PUT
 
 ```sh
-curl -X PUT "http://127.0.0.1:8000/cycles/1" \
+curl -H "x-api-key: super-secret" -X PUT "http://127.0.0.1:8000/cycles/1" \
   -H "accept: application/json" \
   -H "Content-Type: application/json" \
   -d '{
@@ -168,7 +168,7 @@ curl -X PUT "http://127.0.0.1:8000/cycles/1" \
 ### DELETE
 
 ```sh
-curl -X DELETE "http://127.0.0.1:8000/cycles/1" -H "accept: application/json" | jq
+curl -H "x-api-key: super-secret" -X DELETE "http://127.0.0.1:8000/cycles/1" -H "accept: application/json" | jq
 # Example response:
 # {"status":"success","message":"Cycle deleted"}
 ```
@@ -177,7 +177,7 @@ curl -X DELETE "http://127.0.0.1:8000/cycles/1" -H "accept: application/json" | 
 Return the cycle that includes the given transaction date (query param `transaction_date`):
 
 ```sh
-curl -X GET "http://127.0.0.1:8000/cycles/for-date?transaction_date=2026-01-15T12:00:00" -H "accept: application/json" | jq
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/cycles/for-date?transaction_date=2026-01-15T12:00:00" -H "accept: application/json" | jq
 # Example response when found:
 # {"cycle_id":1}
 # Example response when not found:
@@ -190,7 +190,7 @@ curl -X GET "http://127.0.0.1:8000/cycles/for-date?transaction_date=2026-01-15T1
 ### GET (all)
 
 ```sh
-curl -X GET "http://127.0.0.1:8000/transactions" -H "accept: application/json" | jq
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/transactions" -H "accept: application/json" | jq
 # Example response:
 # [{"transaction_id":1,"transaction_date":"2026-01-15T10:30:00","transaction_amount":150.0,"merchant":"Starbucks","account_id":1,"from_address":"noreply@starbucks.com","to_address":"user@example.com","email_uid":100,"email_date":"2026-01-15T10:30:00","transaction_type":"purchase","cycle_id":1,...}]
 ```
@@ -198,7 +198,7 @@ curl -X GET "http://127.0.0.1:8000/transactions" -H "accept: application/json" |
 ### POST (create)
 
 ```sh
-curl -X POST "http://127.0.0.1:8000/transactions" \
+curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/transactions" \
   -H "accept: application/json" \
   -H "Content-Type: application/json" \
   -d '{
@@ -220,7 +220,7 @@ curl -X POST "http://127.0.0.1:8000/transactions" \
 ### GET (by id)
 
 ```sh
-curl -X GET "http://127.0.0.1:8000/transactions/1" -H "accept: application/json" | jq
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/transactions/1" -H "accept: application/json" | jq
 # Example response:
 # {"transaction_id":1,"transaction_date":"2026-01-15T10:30:00","transaction_amount":150.0,"merchant":"Starbucks","account_id":1,"from_address":"noreply@starbucks.com","to_address":"user@example.com","email_uid":100,"email_date":"2026-01-15T10:30:00","transaction_type":"purchase","cycle_id":1,...}
 ```
@@ -228,7 +228,7 @@ curl -X GET "http://127.0.0.1:8000/transactions/1" -H "accept: application/json"
 ### PUT
 
 ```sh
-curl -X PUT "http://127.0.0.1:8000/transactions/1" \
+curl -H "x-api-key: super-secret" -X PUT "http://127.0.0.1:8000/transactions/1" \
   -H "accept: application/json" \
   -H "Content-Type: application/json" \
   -d '{
@@ -249,7 +249,7 @@ curl -X PUT "http://127.0.0.1:8000/transactions/1" \
 ### DELETE
 
 ```sh
-curl -X DELETE "http://127.0.0.1:8000/transactions/1" -H "accept: application/json" | jq
+curl -H "x-api-key: super-secret" -X DELETE "http://127.0.0.1:8000/transactions/1" -H "accept: application/json" | jq
 # Example response:
 # {"status":"success","message":"Transaction deleted"}
 ```

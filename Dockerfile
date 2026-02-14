@@ -25,6 +25,9 @@ RUN uv sync --frozen --no-dev
 # Copy application code
 COPY . .
 
+# Create data directory
+RUN mkdir -p data
+
 # Expose port
 EXPOSE 8000
 
