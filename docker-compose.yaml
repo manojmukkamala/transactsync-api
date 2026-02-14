@@ -16,6 +16,7 @@ services:
     image: ghcr.io/manojmukkamala/transactsync:latest
     environment:
       - API_KEY=super-secret
+      - DATABASE_URL='postgresql://transactsync:transactsync@postgres:5432/transactsync'
     ports:
       - "8000:8000"
     # volumes:
