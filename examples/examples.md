@@ -195,6 +195,21 @@ curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/transactions" -H
 # [{"transaction_id":1,"transaction_date":"2026-01-15T10:30:00","transaction_amount":150.0,"merchant":"Starbucks","account_id":1,"from_address":"noreply@starbucks.com","to_address":"user@example.com","email_uid":100,"email_date":"2026-01-15T10:30:00","transaction_type":"purchase","cycle_id":1,...}]
 ```
 
+### GET (filtered)
+
+Filter transactions by date range and/or cycle_id:
+
+```sh
+# Get transactions between two dates
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/transactions?start_date=2026-01-01T00:00:00&end_date=2026-01-31T23:59:59" -H "accept: application/json" | jq
+
+# Get transactions for a specific cycle
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/transactions?cycle_id=1" -H "accept: application/json" | jq
+
+# Get transactions between two dates for a specific cycle
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/transactions?start_date=2026-01-01T00:00:00&end_date=2026-01-31T23:59:59&cycle_id=1" -H "accept: application/json" | jq
+```
+
 ### POST (create)
 
 ```sh

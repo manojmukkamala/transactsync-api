@@ -418,12 +418,26 @@ async def create_transaction(payload: TransactionRequest) -> TransactionResponse
 @app.get(
     '/transactions', tags=['Transactions'], response_model=list[TransactionResponse]
 )
-async def get_transactions() -> list[TransactionResponse]:
+async def get_transactions(
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
+    cycle_id: int | None = None,
+) -> list[TransactionResponse]:
     """
     Get all transactions.
+    Optionally filter by start_date, end_date, and cycle_id.
     """
     async with get_async_session() as session:
         statement = select(Transaction)
+
+        # Apply filters if provided
+        if start_date is not None:
+            statement = statement.where(Transaction.transaction_date >= start_date)
+        if end_date is not None:
+            statement = statement.where(Transaction.transaction_date <= end_date)
+        if cycle_id is not None:
+            statement = statement.where(Transaction.cycle_id == cycle_id)
+
         result = await session.execute(statement)
         transactions = result.scalars().all()
         return [TransactionResponse.model_validate(t) for t in transactions]
