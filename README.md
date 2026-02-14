@@ -9,8 +9,11 @@ You can run the application using Docker:
 # Pull the image from GitHub Container Registry
 docker pull ghcr.io/manojmukkamala/transactsync:latest
 
-# Run the container
+# Run the container (set DATABASE_URL env variable to point to your DB, ex: `postgresql://transactsync:transactsync@postgres-hostname:5432/transactsync`)
 docker run -p 8000:8000 -e API_KEY="super-secret" ghcr.io/manojmukkamala/transactsync:latest
+
+# To run full stack instead (update volumes in docker-compose.yaml to persist data)
+docker compose up
 ```
 
 The application will be accessible at `http://localhost:8000`.
