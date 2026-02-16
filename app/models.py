@@ -79,14 +79,21 @@ class TransactionResponse(BaseModel):
     transaction_id: int
     transaction_date: datetime
     transaction_amount: float
-    merchant: str
+    merchant: str | None = None
+    category: str | None = None
     account_id: int
-    from_address: str
-    to_address: str
-    email_uid: int
-    email_date: datetime
+    expense_owner: str | None = None
+    from_address: str | None = None
+    to_address: str | None = None
+    email_uid: int | None = None
+    email_date: datetime | None = None
+    is_deleted: bool
+    comment: str | None = None
+    updated_by: str | None = None
+    updated_at: datetime | None = None
     transaction_type: str | None = None
     cycle_id: int | None = None
+    is_budgeted: bool
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -111,6 +118,7 @@ class AccountResponse(BaseModel):
     account_owner: str | None = None
     active: bool = True
     comments: str | None = None
+    account_type: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
