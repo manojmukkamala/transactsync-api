@@ -64,7 +64,6 @@ class Cycle(SQLModel, table=True):
 # API request/response models
 class TransactionRequest(BaseModel):
     load_by: str | None = None
-    transaction_id: int
     transaction_date: datetime
     transaction_amount: float
     merchant: str | None = None
