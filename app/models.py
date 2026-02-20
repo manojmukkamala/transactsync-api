@@ -63,26 +63,7 @@ class Cycle(SQLModel, table=True):
 
 # API request/response models
 class TransactionRequest(BaseModel):
-    transaction_date: datetime
-    transaction_amount: float
-    merchant: str | None = None
-    category: str | None = None
-    account_id: int
-    expense_owner: str | None = None
-    from_address: str | None = None
-    to_address: str | None = None
-    email_uid: int | None = None
-    email_date: datetime | None = None
-    is_deleted: bool
-    comment: str | None = None
-    updated_by: str | None = None
-    updated_at: datetime | None = None
-    transaction_type: str | None = None
-    cycle_id: int | None = None
-    is_budgeted: bool
-
-
-class TransactionResponse(BaseModel):
+    load_by: str | None = None
     transaction_id: int
     transaction_date: datetime
     transaction_amount: float
@@ -94,6 +75,30 @@ class TransactionResponse(BaseModel):
     to_address: str | None = None
     email_uid: int | None = None
     email_date: datetime | None = None
+    llm_reasoning: str | None = None
+    is_deleted: bool
+    comment: str | None = None
+    updated_by: str | None = None
+    updated_at: datetime | None = None
+    transaction_type: str | None = None
+    cycle_id: int | None = None
+    is_budgeted: bool
+
+
+class TransactionResponse(BaseModel):
+    load_by: str | None = None
+    transaction_id: int
+    transaction_date: datetime
+    transaction_amount: float
+    merchant: str | None = None
+    category: str | None = None
+    account_id: int
+    expense_owner: str | None = None
+    from_address: str | None = None
+    to_address: str | None = None
+    email_uid: int | None = None
+    email_date: datetime | None = None
+    llm_reasoning: str | None = None
     is_deleted: bool
     comment: str | None = None
     updated_by: str | None = None
