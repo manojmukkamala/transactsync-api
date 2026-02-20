@@ -63,6 +63,7 @@ class Cycle(SQLModel, table=True):
 
 # API request/response models
 class TransactionRequest(BaseModel):
+    load_by: str | None = None
     transaction_date: datetime
     transaction_amount: float
     merchant: str | None = None
@@ -73,6 +74,7 @@ class TransactionRequest(BaseModel):
     to_address: str | None = None
     email_uid: int | None = None
     email_date: datetime | None = None
+    llm_reasoning: str | None = None
     is_deleted: bool
     comment: str | None = None
     updated_by: str | None = None
@@ -83,6 +85,7 @@ class TransactionRequest(BaseModel):
 
 
 class TransactionResponse(BaseModel):
+    load_by: str | None = None
     transaction_id: int
     transaction_date: datetime
     transaction_amount: float
@@ -94,6 +97,7 @@ class TransactionResponse(BaseModel):
     to_address: str | None = None
     email_uid: int | None = None
     email_date: datetime | None = None
+    llm_reasoning: str | None = None
     is_deleted: bool
     comment: str | None = None
     updated_by: str | None = None
