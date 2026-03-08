@@ -61,6 +61,15 @@ class Cycle(SQLModel, table=True):
     comments: str | None = None
 
 
+class Checkpoint(SQLModel, table=True):
+    __table_args__ = (UniqueConstraint('identifier'),)
+    load_time: datetime = Field(default_factory=datetime.utcnow)
+    load_by: str | None = None
+    id: int | None = Field(default=None, primary_key=True)
+    identifier: str
+    checkpoint: str
+
+
 # API request/response models
 class TransactionRequest(BaseModel):
     load_by: str | None = None
@@ -147,6 +156,23 @@ class EmailCheckpointResponse(BaseModel):
     id: int | None = None
     folder: str
     last_seen_uid: int | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CheckpointRequest(BaseModel):
+    checkpoint: str
+
+
+class CheckpointCreate(BaseModel):
+    identifier: str
+    checkpoint: str
+
+
+class CheckpointResponse(BaseModel):
+    id: int | None = None
+    identifier: str
+    checkpoint: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

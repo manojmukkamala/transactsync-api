@@ -116,6 +116,64 @@ curl -H "x-api-key: super-secret" -X DELETE "http://127.0.0.1:8000/email_checkpo
 ```
 
 
+## checkpoints
+
+### GET
+Get all checkpoints:
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/checkpoints" -H "accept: application/json" | jq
+# Example response:
+# {"checkpoints":[{"id":1,"identifier":"INBOX","checkpoint":"12345"},...]}
+```
+
+Get the last seen UID for a specific folder `INBOX` (returns null if not found):
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/checkpoints/INBOX" -H "accept: application/json" | jq
+# Example response when exists:
+# {"id":1,"identifier":"INBOX","checkpoint":"12345"}
+# Example response when not found:
+# {"id":null,"identifier":"INBOX","checkpoint":null}
+```
+
+### PUT
+Set/update the last seen UID for folder `INBOX`:
+
+```sh
+curl -H "x-api-key: super-secret" -X PUT "http://127.0.0.1:8000/checkpoints/INBOX" \
+  -H "accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{"checkpoint": "66666"}' | jq
+# Example response:
+# {"id":1,"identifier":"INBOX","checkpoint":12345}
+```
+
+### POST
+Create a new email checkpoint:
+
+```sh
+curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/checkpoints" \
+  -H "accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "identifier": "INBOX",
+    "checkpoint": "55555"
+  }'
+# Example response:
+# {"id":1,"identifier":"INBOX","checkpoint":"55555"}
+```
+
+### DELETE
+Delete the checkpoint for a folder:
+
+```sh
+curl -H "x-api-key: super-secret" -X DELETE "http://127.0.0.1:8000/checkpoints/INBOX" -H "accept: application/json" | jq
+# Example response:
+# {"status":"success","message":"Checkpoint for identifier INBOX deleted"}
+```
+
+
 ## cycles
 
 ### GET (all)

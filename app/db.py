@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from .models import Account, Cycle, EmailCheckpoint, Transaction
+from .models import Account, Checkpoint, Cycle, EmailCheckpoint, Transaction
 
 # Database configuration
 DATABASE_URL = os.getenv(
@@ -39,6 +39,7 @@ async def init_db() -> None:
     # Use SQLModel to create tables
     async with async_engine.begin() as conn:
         await conn.run_sync(Account.metadata.create_all)
-        await conn.run_sync(Transaction.metadata.create_all)
-        await conn.run_sync(EmailCheckpoint.metadata.create_all)
         await conn.run_sync(Cycle.metadata.create_all)
+        await conn.run_sync(EmailCheckpoint.metadata.create_all)
+        await conn.run_sync(Checkpoint.metadata.create_all)
+        await conn.run_sync(Transaction.metadata.create_all)

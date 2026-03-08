@@ -14,6 +14,7 @@ services:
   transactsync:
     container_name: transactsync
     image: ghcr.io/manojmukkamala/transactsync-api:latest
+    # image: transactsync-api:v0
     environment:
       - API_KEY=super-secret
       - DATABASE_URL=postgresql://transactsync:transactsync@postgres:5432/transactsync
