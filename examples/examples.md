@@ -5,7 +5,7 @@
 ### GET
 
 ```sh
-curl -H "x-api-key: super-secret" -X 'GET' 'http://127.0.0.1:8000/accounts/1'  -H 'accept: application/json'  | jq 
+curl -H "x-api-key: super-secret" -X 'GET' 'http://127.0.0.1:8000/accounts'  -H 'accept: application/json'  | jq 
 ```
 
 ### GET by account number
@@ -192,9 +192,9 @@ curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/cycles" \
   -H "accept: application/json" \
   -H "Content-Type: application/json" \
   -d '{
-    "cycle_start": "2026-01-01T00:00:00",
-    "cycle_end": "2026-01-31T23:59:59",
-    "cycle_description": "January cycle",
+    "cycle_start": "2025-01-01T00:00:00",
+    "cycle_end": "2025-12-31T23:59:59",
+    "cycle_description": "Random cycle",
     "comments": "Auto-created"
   }' | jq
 # Example response:
