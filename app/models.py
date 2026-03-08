@@ -134,16 +134,16 @@ class AccountResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class CheckpointRequest(BaseModel):
+class EmailCheckpointRequest(BaseModel):
     last_seen_uid: int
 
 
-class CheckpointCreate(BaseModel):
+class EmailCheckpointCreate(BaseModel):
     folder: str
     last_seen_uid: int
 
 
-class CheckpointResponse(BaseModel):
+class EmailCheckpointResponse(BaseModel):
     id: int | None = None
     folder: str
     last_seen_uid: int | None = None
