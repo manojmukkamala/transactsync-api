@@ -46,7 +46,8 @@ curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/accounts" \
     "account_number": "12345678",
     "financial_institution": "Example Bank",
     "account_name": "My Checking",
-    "account_owner": "Alice"
+    "account_owner": "Alice",
+    "load_by": "agent"
   }' | jq
 # Example response (created account):
 # {"account_id": 5, "account_number": "12345678", "financial_institution": "Example Bank", "account_name": "My Checking", "account_owner": "Alice", "active": true, "comments": null, "load_time": null, "load_by": null}
@@ -456,4 +457,152 @@ curl -H "x-api-key: super-secret" -X PUT "http://127.0.0.1:8000/merchants/1" \
 curl -H "x-api-key: super-secret" -X DELETE "http://127.0.0.1:8000/merchants/1" -H "accept: application/json" | jq
 # Example response:
 # {"status":"success","message":"Merchant deleted"}
+```
+
+
+## emails
+
+### GET (all)
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/emails" -H "accept: application/json" | jq
+# Example response:
+# [{"email_id":1,"email_uid":12345,"folder":"INBOX","from_address":"sender@example.com","to_address":"recipient@example.com","email_date":"2026-01-15T10:30:00","load_time":null,"load_by":null}]
+```
+
+### POST (create)
+
+```sh
+curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/emails" \
+  -H "accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email_uid": 54321,
+    "folder": "INBOX",
+    "from_address": "noreply@bank.com",
+    "to_address": "user@example.com",
+    "email_date": "2026-01-15T10:30:00"
+  }' | jq
+# Example response:
+# {"email_id":2,"email_uid":54321,"folder":"INBOX","from_address":"noreply@bank.com","to_address":"user@example.com","email_date":"2026-01-15T10:30:00","load_time":null,"load_by":null}
+```
+
+### GET (by id)
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/emails/1" -H "accept: application/json" | jq
+# Example response:
+# {"email_id":1,"email_uid":12345,"folder":"INBOX","from_address":"sender@example.com","to_address":"recipient@example.com","email_date":"2026-01-15T10:30:00","load_time":null,"load_by":null}
+```
+
+### GET (by uid)
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/emails/uid/54321" -H "accept: application/json" | jq
+# Example response:
+# {"email_id":2,"email_uid":54321,"folder":"INBOX","from_address":"noreply@bank.com","to_address":"user@example.com","email_date":"2026-01-15T10:30:00","load_time":null,"load_by":null}
+```
+
+### GET (by folder)
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/emails/folder/latest/INBOX" -H "accept: application/json" | jq
+# Example response:
+# {"email_id":2,"email_uid":54321,"folder":"INBOX","from_address":"noreply@bank.com","to_address":"user@example.com","email_date":"2026-01-15T10:30:00","load_time":null,"load_by":null}
+```
+
+### PUT
+
+```sh
+curl -H "x-api-key: super-secret" -X PUT "http://127.0.0.1:8000/emails/1" \
+  -H "accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email_uid": 12345,
+    "folder": "INBOX",
+    "from_address": "sender@example.com",
+    "to_address": "recipient@example.com",
+    "email_date": "2026-01-15T10:30:00"
+  }' | jq
+# Example response: same as GET but with updated fields
+```
+
+### DELETE
+
+```sh
+curl -H "x-api-key: super-secret" -X DELETE "http://127.0.0.1:8000/emails/1" -H "accept: application/json" | jq
+# Example response:
+# {"status":"success","message":"Email deleted"}
+```
+
+
+## files
+
+### GET (all)
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/files" -H "accept: application/json" | jq
+# Example response:
+# [{"file_id":1,"file_name":"transaction_report_2026-01-15.csv","file_path":"/reports/2026/01","file_created_at":"2026-01-15T10:30:00","load_time":null,"load_by":null}]
+```
+
+### POST (create)
+
+```sh
+curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/files" \
+  -H "accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_name": "transaction_report_2026-01-15.csv",
+    "file_path": "/reports/2026/01",
+    "file_created_at": "2026-01-15T10:30:00"
+  }' | jq
+# Example response:
+# {"file_id":2,"file_name":"transaction_report_2026-01-15.csv","file_path":"/reports/2026/01","file_created_at":"2026-01-15T10:30:00","load_time":null,"load_by":null}
+```
+
+### GET (by id)
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/files/1" -H "accept: application/json" | jq
+# Example response:
+# {"file_id":1,"file_name":"transaction_report_2026-01-15.csv","file_path":"/reports/2026/01","file_created_at":"2026-01-15T10:30:00","load_time":null,"load_by":null}
+```
+
+### GET (by path)
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/files/path//reports/2026/01" -H "accept: application/json" | jq
+# Example response:
+# [{"file_id":1,"file_name":"transaction_report_2026-01-15.csv","file_path":"/reports/2026/01","file_created_at":"2026-01-15T10:30:00","load_time":null,"load_by":null}]
+```
+
+### GET (latest by path)
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/files/path/latest//reports/2026/01" -H "accept: application/json" | jq
+# Example response:
+# {"file_id":1,"file_name":"transaction_report_2026-01-15.csv","file_path":"/reports/2026/01","file_created_at":"2026-01-15T10:30:00","load_time":null,"load_by":null}
+```
+
+### PUT
+
+```sh
+curl -H "x-api-key: super-secret" -X PUT "http://127.0.0.1:8000/files/1" \
+  -H "accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_name": "transaction_report_2026-01-15.csv",
+    "file_path": "/reports/2026/01",
+    "file_created_at": "2026-01-15T10:30:00"
+  }' | jq
+# Example response: same as GET but with updated fields
+```
+
+### DELETE
+
+```sh
+curl -H "x-api-key: super-secret" -X DELETE "http://127.0.0.1:8000/files/1" -H "accept: application/json" | jq
+# Example response:
+# {"status":"success","message":"File deleted"}
 ```

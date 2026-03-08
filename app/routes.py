@@ -11,6 +11,9 @@ from .models import (
     AccountIdResponse,
     AccountRequest,
     AccountResponse,
+    Category,
+    CategoryRequest,
+    CategoryResponse,
     Checkpoint,
     CheckpointCreate,
     CheckpointRequest,
@@ -19,19 +22,22 @@ from .models import (
     CycleIdResponse,
     CycleRequest,
     CycleResponse,
+    Email,
     EmailCheckpoint,
     EmailCheckpointCreate,
     EmailCheckpointRequest,
     EmailCheckpointResponse,
-    Transaction,
-    TransactionRequest,
-    TransactionResponse,
-    Category,
-    CategoryRequest,
-    CategoryResponse,
+    EmailRequest,
+    EmailResponse,
+    File,
+    FileRequest,
+    FileResponse,
     Merchant,
     MerchantRequest,
     MerchantResponse,
+    Transaction,
+    TransactionRequest,
+    TransactionResponse,
 )
 from .security import get_api_key
 
@@ -682,7 +688,9 @@ async def get_categories() -> list[CategoryResponse]:
         return [CategoryResponse.model_validate(c) for c in categories]
 
 
-@app.get('/categories/{category_id}', tags=['Categories'], response_model=CategoryResponse)
+@app.get(
+    '/categories/{category_id}', tags=['Categories'], response_model=CategoryResponse
+)
 async def get_category_by_id(category_id: int) -> CategoryResponse:
     """
     Get a category by ID.
@@ -700,7 +708,11 @@ async def get_category_by_id(category_id: int) -> CategoryResponse:
         return CategoryResponse.model_validate(cat)
 
 
-@app.get('/categories/name/{category_name}', tags=['Categories'], response_model=CategoryResponse)
+@app.get(
+    '/categories/name/{category_name}',
+    tags=['Categories'],
+    response_model=CategoryResponse,
+)
 async def get_category_by_name(category_name: str) -> CategoryResponse:
     """
     Get a category by name.
@@ -718,7 +730,9 @@ async def get_category_by_name(category_name: str) -> CategoryResponse:
         return CategoryResponse.model_validate(cat)
 
 
-@app.put('/categories/{category_id}', tags=['Categories'], response_model=CategoryResponse)
+@app.put(
+    '/categories/{category_id}', tags=['Categories'], response_model=CategoryResponse
+)
 async def update_category(
     category_id: int, payload: CategoryRequest
 ) -> CategoryResponse:
@@ -795,7 +809,9 @@ async def get_merchants() -> list[MerchantResponse]:
         return [MerchantResponse.model_validate(c) for c in merchants]
 
 
-@app.get('/merchants/{merchant_id}', tags=['Merchants'], response_model=MerchantResponse)
+@app.get(
+    '/merchants/{merchant_id}', tags=['Merchants'], response_model=MerchantResponse
+)
 async def get_merchant_by_id(merchant_id: int) -> MerchantResponse:
     """
     Get a merchant by ID.
@@ -813,7 +829,11 @@ async def get_merchant_by_id(merchant_id: int) -> MerchantResponse:
         return MerchantResponse.model_validate(merch)
 
 
-@app.get('/merchants/name/{merchant_name}', tags=['Merchants'], response_model=MerchantResponse)
+@app.get(
+    '/merchants/name/{merchant_name}',
+    tags=['Merchants'],
+    response_model=MerchantResponse,
+)
 async def get_merchant_by_name(merchant_name: str) -> MerchantResponse:
     """
     Get a merchant by name.
@@ -831,7 +851,9 @@ async def get_merchant_by_name(merchant_name: str) -> MerchantResponse:
         return MerchantResponse.model_validate(merch)
 
 
-@app.put('/merchants/{merchant_id}', tags=['Merchants'], response_model=MerchantResponse)
+@app.put(
+    '/merchants/{merchant_id}', tags=['Merchants'], response_model=MerchantResponse
+)
 async def update_merchant(
     merchant_id: int, payload: MerchantRequest
 ) -> MerchantResponse:
@@ -878,6 +900,274 @@ async def delete_merchant(merchant_id: int) -> dict:
         await session.delete(merch)
         await session.commit()
         return {'status': 'success', 'message': 'Merchant deleted'}
+
+
+# Email endpoints
+@app.post('/emails', tags=['Emails'], response_model=EmailResponse)
+async def create_email(payload: EmailRequest) -> EmailResponse:
+    """
+    Create a new email.
+    """
+    async with get_async_session() as session:
+        email = Email(**payload.model_dump())
+        session.add(email)
+        await session.commit()
+        await session.refresh(email)
+        return EmailResponse.model_validate(email)
+
+
+@app.get('/emails', tags=['Emails'], response_model=list[EmailResponse])
+async def get_emails() -> list[EmailResponse]:
+    """
+    Get all emails.
+    Returns:
+        List of all emails
+    """
+    async with get_async_session() as session:
+        statement = select(Email)
+        result = await session.execute(statement)
+        emails = result.scalars().all()
+        return [EmailResponse.model_validate(e) for e in emails]
+
+
+@app.get('/emails/{email_id}', tags=['Emails'], response_model=EmailResponse)
+async def get_email_by_id(email_id: int) -> EmailResponse:
+    """
+    Get an email by ID.
+    Args:
+        email_id: ID of the email to retrieve
+    Returns:
+        Email data
+    """
+    async with get_async_session() as session:
+        statement = select(Email).where(Email.email_id == email_id)
+        result = await session.execute(statement)
+        email = result.scalars().one_or_none()
+        if not email:
+            raise HTTPException(status_code=404, detail='Email not found')
+        return EmailResponse.model_validate(email)
+
+
+@app.get(
+    '/emails/folder/latest/{folder}', tags=['Emails'], response_model=EmailResponse
+)
+async def get_latest_email_by_folder(folder: str) -> EmailResponse:
+    """
+    Get the latest email for a given folder.
+    Args:
+        folder: Folder name to search for
+    Returns:
+        Latest email data from the folder
+    """
+    async with get_async_session() as session:
+        statement = (
+            select(Email)
+            .where(Email.folder == folder, Email.email_date is not None)
+            .order_by(Email.email_date.desc())  # type: ignore[union-attr]
+            .limit(1)
+        )
+        result = await session.execute(statement)
+        email = result.scalars().one_or_none()
+        if not email:
+            raise HTTPException(status_code=404, detail='Email not found')
+        return EmailResponse.model_validate(email)
+
+        
+@app.get('/emails/uid/{email_uid}', tags=['Emails'], response_model=EmailResponse)
+async def get_email_by_uid(email_uid: int) -> EmailResponse:
+    """
+    Get an email by email_uid.
+    Args:
+        email_uid: UID of the email to retrieve
+    Returns:
+        Email data
+    """
+    async with get_async_session() as session:
+        statement = select(Email).where(Email.email_uid == email_uid)
+        result = await session.execute(statement)
+        email = result.scalars().one_or_none()
+        if not email:
+            raise HTTPException(status_code=404, detail='Email not found')
+        return EmailResponse.model_validate(email)
+
+
+@app.put('/emails/{email_id}', tags=['Emails'], response_model=EmailResponse)
+async def update_email(email_id: int, payload: EmailRequest) -> EmailResponse:
+    """
+    Update an email.
+    Args:
+        email_id: ID of the email to update
+        payload: Updated email data
+    Returns:
+        Updated email data
+    """
+    async with get_async_session() as session:
+        statement = select(Email).where(Email.email_id == email_id)
+        result = await session.execute(statement)
+        email = result.scalars().one_or_none()
+        if not email:
+            raise HTTPException(status_code=404, detail='Email not found')
+
+        for key, value in payload.model_dump().items():
+            if hasattr(email, key):
+                setattr(email, key, value)
+
+        await session.commit()
+        await session.refresh(email)
+        return EmailResponse.model_validate(email)
+
+
+@app.delete('/emails/{email_id}', tags=['Emails'])
+async def delete_email(email_id: int) -> dict:
+    """
+    Delete an email.
+    Args:
+        email_id: ID of the email to delete
+    Returns:
+        Deletion status
+    """
+    async with get_async_session() as session:
+        statement = select(Email).where(Email.email_id == email_id)
+        result = await session.execute(statement)
+        email = result.scalars().one_or_none()
+        if not email:
+            raise HTTPException(status_code=404, detail='Email not found')
+
+        await session.delete(email)
+        await session.commit()
+        return {'status': 'success', 'message': 'Email deleted'}
+
+
+# File endpoints
+@app.post('/files', tags=['Files'], response_model=FileResponse)
+async def create_file(payload: FileRequest) -> FileResponse:
+    """
+    Create a new file.
+    """
+    async with get_async_session() as session:
+        file = File(**payload.model_dump())
+        session.add(file)
+        await session.commit()
+        await session.refresh(file)
+        return FileResponse.model_validate(file)
+
+
+@app.get('/files', tags=['Files'], response_model=list[FileResponse])
+async def get_files() -> list[FileResponse]:
+    """
+    Get all files.
+    Returns:
+        List of all files
+    """
+    async with get_async_session() as session:
+        statement = select(File)
+        result = await session.execute(statement)
+        files = result.scalars().all()
+        return [FileResponse.model_validate(f) for f in files]
+
+
+@app.get('/files/{file_id}', tags=['Files'], response_model=FileResponse)
+async def get_file_by_id(file_id: int) -> FileResponse:
+    """
+    Get a file by ID.
+    Args:
+        file_id: ID of the file to retrieve
+    Returns:
+        File data
+    """
+    async with get_async_session() as session:
+        statement = select(File).where(File.file_id == file_id)
+        result = await session.execute(statement)
+        file = result.scalars().one_or_none()
+        if not file:
+            raise HTTPException(status_code=404, detail='File not found')
+        return FileResponse.model_validate(file)
+
+
+@app.get('/files/path/latest/{file_path:path}', tags=['Files'], response_model=FileResponse)
+async def get_latest_file_by_path(file_path: str) -> FileResponse:
+    """
+    Get the latest file (by file_created_at) for a given file_path.
+    Args:
+        file_path: Path to search for the latest file
+    Returns:
+        Latest file with the specified path
+    """
+    async with get_async_session() as session:
+        statement = (
+            select(File)
+            .where(File.file_path == file_path, File.file_created_at is not None)
+            .order_by(File.file_created_at.desc())  # type: ignore[union-attr]
+            .limit(1)
+        )
+        result = await session.execute(statement)
+        file = result.scalars().one_or_none()
+        if not file:
+            raise HTTPException(status_code=404, detail='File not found')
+        return FileResponse.model_validate(file)        
+
+
+@app.get('/files/path/{file_path:path}', tags=['Files'], response_model=list[FileResponse])
+async def get_files_by_path(file_path: str) -> list[FileResponse]:
+    """
+    Get all files for a given file_path.
+    Args:
+        file_path: Path to search for files
+    Returns:
+        List of files with the specified path
+    """
+    async with get_async_session() as session:
+        statement = select(File).where(File.file_path == file_path)
+        result = await session.execute(statement)
+        files = result.scalars().all()
+        return [FileResponse.model_validate(f) for f in files]
+
+
+@app.put('/files/{file_id}', tags=['Files'], response_model=FileResponse)
+async def update_file(file_id: int, payload: FileRequest) -> FileResponse:
+    """
+    Update a file.
+    Args:
+        file_id: ID of the file to update
+        payload: Updated file data
+    Returns:
+        Updated file data
+    """
+    async with get_async_session() as session:
+        statement = select(File).where(File.file_id == file_id)
+        result = await session.execute(statement)
+        file = result.scalars().one_or_none()
+        if not file:
+            raise HTTPException(status_code=404, detail='File not found')
+
+        for key, value in payload.model_dump().items():
+            if hasattr(file, key):
+                setattr(file, key, value)
+
+        await session.commit()
+        await session.refresh(file)
+        return FileResponse.model_validate(file)
+
+
+@app.delete('/files/{file_id}', tags=['Files'])
+async def delete_file(file_id: int) -> dict:
+    """
+    Delete a file.
+    Args:
+        file_id: ID of the file to delete
+    Returns:
+        Deletion status
+    """
+    async with get_async_session() as session:
+        statement = select(File).where(File.file_id == file_id)
+        result = await session.execute(statement)
+        file = result.scalars().one_or_none()
+        if not file:
+            raise HTTPException(status_code=404, detail='File not found')
+
+        await session.delete(file)
+        await session.commit()
+        return {'status': 'success', 'message': 'File deleted'}
 
 
 if __name__ == '__main__':
