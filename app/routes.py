@@ -11,6 +11,7 @@ from .models import (
     AccountIdResponse,
     AccountRequest,
     AccountResponse,
+    Checkpoint,
     CheckpointCreate,
     CheckpointRequest,
     CheckpointResponse,
@@ -19,6 +20,9 @@ from .models import (
     CycleRequest,
     CycleResponse,
     EmailCheckpoint,
+    EmailCheckpointCreate,
+    EmailCheckpointRequest,
+    EmailCheckpointResponse,
     Transaction,
     TransactionRequest,
     TransactionResponse,
@@ -281,38 +285,56 @@ async def delete_cycle(cycle_id: int) -> dict:
 @app.get(
     '/email_checkpoints/{folder}',
     tags=['EmailCheckpoints'],
-    response_model=CheckpointResponse,
+    response_model=EmailCheckpointResponse,
 )
-async def get_last_seen_uid(folder: str) -> CheckpointResponse:
+async def get_last_seen_uid(folder: str) -> EmailCheckpointResponse:
     """
     Retrieve the last seen email UID for a specific folder.
     Returns:
-        CheckpointResponse: Checkpoint data with folder and last_seen_uid
+        EmailCheckpointResponse: Checkpoint data with folder and last_seen_uid
     """
     async with get_async_session() as session:
         statement = select(EmailCheckpoint).where(EmailCheckpoint.folder == folder)
         result = await session.execute(statement)
         cp = result.scalars().one_or_none()
         if cp:
-            return CheckpointResponse.model_validate(cp)
+            return EmailCheckpointResponse.model_validate(cp)
         else:
-            return CheckpointResponse(folder=folder, last_seen_uid=None)
+            return EmailCheckpointResponse(folder=folder, last_seen_uid=None)
+
+
+@app.get(
+    '/email_checkpoints',
+    tags=['EmailCheckpoints'],
+    response_model=list[EmailCheckpointResponse],
+)
+async def get_all_email_checkpoints() -> list[EmailCheckpointResponse]:
+    """
+    Get all email checkpoints.
+    Returns:
+        List[EmailCheckpointResponse]: List of all checkpoints
+    """
+    async with get_async_session() as session:
+        statement = select(EmailCheckpoint)
+        result = await session.execute(statement)
+        checkpoints = result.scalars().all()
+        return [EmailCheckpointResponse.model_validate(cp) for cp in checkpoints]
 
 
 @app.put(
     '/email_checkpoints/{folder}',
     tags=['EmailCheckpoints'],
-    response_model=CheckpointResponse,
+    response_model=EmailCheckpointResponse,
 )
 async def set_last_seen_uid(
-    folder: str, payload: CheckpointRequest
-) -> CheckpointResponse:
+    folder: str, payload: EmailCheckpointRequest
+) -> EmailCheckpointResponse:
     """
     Update or insert the last seen email UID for a specific folder.
     Body:
         payload.last_seen_uid (int): UID to store
     Returns:
-        CheckpointResponse: Updated checkpoint data
+        EmailCheckpointResponse: Updated checkpoint data
     """
     async with get_async_session() as session:
         statement = select(EmailCheckpoint).where(EmailCheckpoint.folder == folder)
@@ -323,24 +345,28 @@ async def set_last_seen_uid(
             cp.last_seen_uid = payload.last_seen_uid
             await session.commit()
             await session.refresh(cp)
-            return CheckpointResponse.model_validate(cp)
+            return EmailCheckpointResponse.model_validate(cp)
         else:
             cp = EmailCheckpoint(folder=folder, last_seen_uid=payload.last_seen_uid)
             session.add(cp)
             await session.commit()
             await session.refresh(cp)
-            return CheckpointResponse.model_validate(cp)
+            return EmailCheckpointResponse.model_validate(cp)
 
 
 @app.post(
-    '/email_checkpoints', tags=['EmailCheckpoints'], response_model=CheckpointResponse
+    '/email_checkpoints',
+    tags=['EmailCheckpoints'],
+    response_model=EmailCheckpointResponse,
 )
-async def create_email_checkpoint(payload: CheckpointCreate) -> CheckpointResponse:
+async def create_email_checkpoint(
+    payload: EmailCheckpointCreate,
+) -> EmailCheckpointResponse:
     """
     Create a new email checkpoint or update if exists.
     Body: {"folder": str, "last_seen_uid": int}
     Returns:
-        CheckpointResponse: Created/updated checkpoint data
+        EmailCheckpointResponse: Created/updated checkpoint data
     """
     async with get_async_session() as session:
         # check if already exists
@@ -354,31 +380,13 @@ async def create_email_checkpoint(payload: CheckpointCreate) -> CheckpointRespon
             existing.last_seen_uid = payload.last_seen_uid
             await session.commit()
             await session.refresh(existing)
-            return CheckpointResponse.model_validate(existing)
+            return EmailCheckpointResponse.model_validate(existing)
 
         cp = EmailCheckpoint(folder=payload.folder, last_seen_uid=payload.last_seen_uid)
         session.add(cp)
         await session.commit()
         await session.refresh(cp)
-        return CheckpointResponse.model_validate(cp)
-
-
-@app.get(
-    '/email_checkpoints',
-    tags=['EmailCheckpoints'],
-    response_model=list[CheckpointResponse],
-)
-async def get_all_email_checkpoints() -> list[CheckpointResponse]:
-    """
-    Get all email checkpoints.
-    Returns:
-        List[CheckpointResponse]: List of all checkpoints
-    """
-    async with get_async_session() as session:
-        statement = select(EmailCheckpoint)
-        result = await session.execute(statement)
-        checkpoints = result.scalars().all()
-        return [CheckpointResponse.model_validate(cp) for cp in checkpoints]
+        return EmailCheckpointResponse.model_validate(cp)
 
 
 @app.delete('/email_checkpoints/{folder}', tags=['EmailCheckpoints'])
@@ -398,6 +406,134 @@ async def delete_email_checkpoint(folder: str) -> dict:
         return {
             'status': 'success',
             'message': f'Checkpoint for folder {folder} deleted',
+        }
+
+
+# checkpoints endpoints
+@app.get(
+    '/checkpoints/{identifier}',
+    tags=['Checkpoints'],
+    response_model=CheckpointResponse,
+)
+async def get_latest_checkpoint(identifier: str) -> CheckpointResponse:
+    """
+    Retrieve the latest checkpoint for a specific identifier.
+    Returns:
+        CheckpointResponse: Checkpoint data with identifier and checkpoint
+    """
+    async with get_async_session() as session:
+        statement = select(Checkpoint).where(Checkpoint.identifier == identifier)
+        result = await session.execute(statement)
+        cp = result.scalars().one_or_none()
+        if cp:
+            return CheckpointResponse.model_validate(cp)
+        else:
+            return CheckpointResponse(identifier=identifier, checkpoint=None)
+
+
+@app.get(
+    '/checkpoints',
+    tags=['Checkpoints'],
+    response_model=list[CheckpointResponse],
+)
+async def get_all_checkpoints() -> list[CheckpointResponse]:
+    """
+    Get all  checkpoints.
+    Returns:
+        List[CheckpointResponse]: List of all checkpoints
+    """
+    async with get_async_session() as session:
+        statement = select(Checkpoint)
+        result = await session.execute(statement)
+        checkpoints = result.scalars().all()
+        return [CheckpointResponse.model_validate(cp) for cp in checkpoints]
+
+
+@app.put(
+    '/checkpoints/{identifier}',
+    tags=['Checkpoints'],
+    response_model=CheckpointResponse,
+)
+async def set_latest_checkpoint(
+    identifier: str, payload: CheckpointRequest
+) -> CheckpointResponse:
+    """
+    Update or insert the latest checkpoint for a specific identifier.
+    Body:
+        payload.checkpoint (str): checkpoint to store
+    Returns:
+        CheckpointResponse: Updated checkpoint data
+    """
+    async with get_async_session() as session:
+        statement = select(Checkpoint).where(Checkpoint.identifier == identifier)
+        result = await session.execute(statement)
+        cp = result.scalars().one_or_none()
+
+        if cp:
+            cp.checkpoint = payload.checkpoint
+            await session.commit()
+            await session.refresh(cp)
+            return CheckpointResponse.model_validate(cp)
+        else:
+            cp = Checkpoint(identifier=identifier, checkpoint=payload.checkpoint)
+            session.add(cp)
+            await session.commit()
+            await session.refresh(cp)
+            return CheckpointResponse.model_validate(cp)
+
+
+@app.post(
+    '/checkpoints',
+    tags=['Checkpoints'],
+    response_model=CheckpointResponse,
+)
+async def create_checkpoint(
+    payload: CheckpointCreate,
+) -> CheckpointResponse:
+    """
+    Create a new  checkpoint or update if exists.
+    Body: {"identifier": str, "checkpoint": str}
+    Returns:
+        CheckpointResponse: Created/updated checkpoint data
+    """
+    async with get_async_session() as session:
+        # check if already exists
+        statement = select(Checkpoint).where(
+            Checkpoint.identifier == payload.identifier
+        )
+        result = await session.execute(statement)
+        existing = result.scalars().one_or_none()
+        if existing:
+            # If exists, update value and return
+            existing.checkpoint = payload.checkpoint
+            await session.commit()
+            await session.refresh(existing)
+            return CheckpointResponse.model_validate(existing)
+
+        cp = Checkpoint(identifier=payload.identifier, checkpoint=payload.checkpoint)
+        session.add(cp)
+        await session.commit()
+        await session.refresh(cp)
+        return CheckpointResponse.model_validate(cp)
+
+
+@app.delete('/checkpoints/{identifier}', tags=['Checkpoints'])
+async def delete_checkpoint(identifier: str) -> dict:
+    """
+    Delete an  checkpoint by identifier.
+    Returns a status dict.
+    """
+    async with get_async_session() as session:
+        statement = select(Checkpoint).where(Checkpoint.identifier == identifier)
+        result = await session.execute(statement)
+        cp = result.scalars().one_or_none()
+        if not cp:
+            raise HTTPException(status_code=404, detail='checkpoint not found')
+        await session.delete(cp)
+        await session.commit()
+        return {
+            'status': 'success',
+            'message': f'Checkpoint for identifier {identifier} deleted',
         }
 
 

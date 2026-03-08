@@ -61,6 +61,33 @@ class Cycle(SQLModel, table=True):
     comments: str | None = None
 
 
+class Checkpoint(SQLModel, table=True):
+    __table_args__ = (UniqueConstraint('identifier'),)
+    load_time: datetime = Field(default_factory=datetime.utcnow)
+    load_by: str | None = None
+    id: int | None = Field(default=None, primary_key=True)
+    identifier: str
+    checkpoint: str
+
+
+class Category(SQLModel, table=True):
+    load_time: datetime = Field(default_factory=datetime.utcnow)
+    load_by: str | None = None
+    category_id: int | None = Field(default=None, primary_key=True)
+    category_name: str
+    category_description: str | None = None
+    comments: str | None = None
+
+
+class Merchant(SQLModel, table=True):
+    load_time: datetime = Field(default_factory=datetime.utcnow)
+    load_by: str | None = None
+    merchant_id: int | None = Field(default=None, primary_key=True)
+    merchant_name: str
+    merchant_description: str | None = None
+    comments: str | None = None
+
+
 # API request/response models
 class TransactionRequest(BaseModel):
     load_by: str | None = None
@@ -134,19 +161,36 @@ class AccountResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class CheckpointRequest(BaseModel):
+class EmailCheckpointRequest(BaseModel):
     last_seen_uid: int
+
+
+class EmailCheckpointCreate(BaseModel):
+    folder: str
+    last_seen_uid: int
+
+
+class EmailCheckpointResponse(BaseModel):
+    id: int | None = None
+    folder: str
+    last_seen_uid: int | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CheckpointRequest(BaseModel):
+    checkpoint: str
 
 
 class CheckpointCreate(BaseModel):
-    folder: str
-    last_seen_uid: int
+    identifier: str
+    checkpoint: str
 
 
 class CheckpointResponse(BaseModel):
     id: int | None = None
-    folder: str
-    last_seen_uid: int | None = None
+    identifier: str
+    checkpoint: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
