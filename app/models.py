@@ -42,15 +42,6 @@ class Transaction(SQLModel, table=True):
     is_budgeted: bool = False
 
 
-class EmailCheckpoint(SQLModel, table=True):
-    __table_args__ = (UniqueConstraint('folder'),)
-    load_time: datetime = Field(default_factory=datetime.utcnow)
-    load_by: str | None = None
-    id: int | None = Field(default=None, primary_key=True)
-    folder: str
-    last_seen_uid: int
-
-
 class Cycle(SQLModel, table=True):
     load_time: datetime = Field(default_factory=datetime.utcnow)
     load_by: str | None = None
@@ -59,6 +50,15 @@ class Cycle(SQLModel, table=True):
     cycle_end: datetime
     cycle_description: str | None = None
     comments: str | None = None
+
+
+class EmailCheckpoint(SQLModel, table=True):
+    __table_args__ = (UniqueConstraint('folder'),)
+    load_time: datetime = Field(default_factory=datetime.utcnow)
+    load_by: str | None = None
+    id: int | None = Field(default=None, primary_key=True)
+    folder: str
+    last_seen_uid: int
 
 
 class Checkpoint(SQLModel, table=True):
@@ -218,5 +218,35 @@ class CycleIdResponse(BaseModel):
 
 class AccountIdResponse(BaseModel):
     account_id: int | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CategoryRequest(BaseModel):
+    category_name: str
+    category_description: str | None = None
+    comments: str | None = None
+
+
+class CategoryResponse(BaseModel):
+    category_id: int | None = None
+    category_name: str
+    category_description: str | None = None
+    comments: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MerchantRequest(BaseModel):
+    merchant_name: str
+    merchant_description: str | None = None
+    comments: str | None = None
+
+
+class MerchantResponse(BaseModel):
+    merchant_id: int | None = None
+    merchant_name: str
+    merchant_description: str | None = None
+    comments: str | None = None
 
     model_config = ConfigDict(from_attributes=True)

@@ -26,6 +26,12 @@ from .models import (
     Transaction,
     TransactionRequest,
     TransactionResponse,
+    Category,
+    CategoryRequest,
+    CategoryResponse,
+    Merchant,
+    MerchantRequest,
+    MerchantResponse,
 )
 from .security import get_api_key
 
@@ -646,6 +652,232 @@ async def delete_transaction(transaction_id: int) -> dict:
         await session.delete(txn)
         await session.commit()
         return {'status': 'success', 'message': 'Transaction deleted'}
+
+
+# Category endpoints
+@app.post('/categories', tags=['Categories'], response_model=CategoryResponse)
+async def create_category(payload: CategoryRequest) -> CategoryResponse:
+    """
+    Create a new category.
+    """
+    async with get_async_session() as session:
+        cat = Category(**payload.model_dump())
+        session.add(cat)
+        await session.commit()
+        await session.refresh(cat)
+        return CategoryResponse.model_validate(cat)
+
+
+@app.get('/categories', tags=['Categories'], response_model=list[CategoryResponse])
+async def get_categories() -> list[CategoryResponse]:
+    """
+    Get all categories.
+    Returns:
+        List of all categories
+    """
+    async with get_async_session() as session:
+        statement = select(Category)
+        result = await session.execute(statement)
+        categories = result.scalars().all()
+        return [CategoryResponse.model_validate(c) for c in categories]
+
+
+@app.get('/categories/{category_id}', tags=['Categories'], response_model=CategoryResponse)
+async def get_category_by_id(category_id: int) -> CategoryResponse:
+    """
+    Get a category by ID.
+    Args:
+        category_id: ID of the category to retrieve
+    Returns:
+        Category data
+    """
+    async with get_async_session() as session:
+        statement = select(Category).where(Category.category_id == category_id)
+        result = await session.execute(statement)
+        cat = result.scalars().one_or_none()
+        if not cat:
+            raise HTTPException(status_code=404, detail='Category not found')
+        return CategoryResponse.model_validate(cat)
+
+
+@app.get('/categories/name/{category_name}', tags=['Categories'], response_model=CategoryResponse)
+async def get_category_by_name(category_name: str) -> CategoryResponse:
+    """
+    Get a category by name.
+    Args:
+        category_name: Name of the category to retrieve
+    Returns:
+        Category data
+    """
+    async with get_async_session() as session:
+        statement = select(Category).where(Category.category_name == category_name)
+        result = await session.execute(statement)
+        cat = result.scalars().one_or_none()
+        if not cat:
+            raise HTTPException(status_code=404, detail='Category not found')
+        return CategoryResponse.model_validate(cat)
+
+
+@app.put('/categories/{category_id}', tags=['Categories'], response_model=CategoryResponse)
+async def update_category(
+    category_id: int, payload: CategoryRequest
+) -> CategoryResponse:
+    """
+    Update a category.
+    Args:
+        category_id: ID of the category to update
+        payload: Updated category data
+    Returns:
+        Updated category data
+    """
+    async with get_async_session() as session:
+        statement = select(Category).where(Category.category_id == category_id)
+        result = await session.execute(statement)
+        cat = result.scalars().one_or_none()
+        if not cat:
+            raise HTTPException(status_code=404, detail='Category not found')
+
+        for key, value in payload.model_dump().items():
+            if hasattr(cat, key):
+                setattr(cat, key, value)
+
+        await session.commit()
+        await session.refresh(cat)
+        return CategoryResponse.model_validate(cat)
+
+
+@app.delete('/categories/{category_id}', tags=['Categories'])
+async def delete_category(category_id: int) -> dict:
+    """
+    Delete a category.
+    Args:
+        category_id: ID of the category to delete
+    Returns:
+        Deletion status
+    """
+    async with get_async_session() as session:
+        statement = select(Category).where(Category.category_id == category_id)
+        result = await session.execute(statement)
+        cat = result.scalars().one_or_none()
+        if not cat:
+            raise HTTPException(status_code=404, detail='Category not found')
+
+        await session.delete(cat)
+        await session.commit()
+        return {'status': 'success', 'message': 'Category deleted'}
+
+
+# Merchant endpoints
+@app.post('/merchants', tags=['Merchants'], response_model=MerchantResponse)
+async def create_merchant(payload: MerchantRequest) -> MerchantResponse:
+    """
+    Create a new merchant.
+    """
+    async with get_async_session() as session:
+        merch = Merchant(**payload.model_dump())
+        session.add(merch)
+        await session.commit()
+        await session.refresh(merch)
+        return MerchantResponse.model_validate(merch)
+
+
+@app.get('/merchants', tags=['Merchants'], response_model=list[MerchantResponse])
+async def get_merchants() -> list[MerchantResponse]:
+    """
+    Get all merchants.
+    Returns:
+        List of all merchants
+    """
+    async with get_async_session() as session:
+        statement = select(Merchant)
+        result = await session.execute(statement)
+        merchants = result.scalars().all()
+        return [MerchantResponse.model_validate(c) for c in merchants]
+
+
+@app.get('/merchants/{merchant_id}', tags=['Merchants'], response_model=MerchantResponse)
+async def get_merchant_by_id(merchant_id: int) -> MerchantResponse:
+    """
+    Get a merchant by ID.
+    Args:
+        merchant_id: ID of the merchant to retrieve
+    Returns:
+        Merchant data
+    """
+    async with get_async_session() as session:
+        statement = select(Merchant).where(Merchant.merchant_id == merchant_id)
+        result = await session.execute(statement)
+        merch = result.scalars().one_or_none()
+        if not merch:
+            raise HTTPException(status_code=404, detail='Merchant not found')
+        return MerchantResponse.model_validate(merch)
+
+
+@app.get('/merchants/name/{merchant_name}', tags=['Merchants'], response_model=MerchantResponse)
+async def get_merchant_by_name(merchant_name: str) -> MerchantResponse:
+    """
+    Get a merchant by name.
+    Args:
+        merchant_name: Name of the merchant to retrieve
+    Returns:
+        Merchant data
+    """
+    async with get_async_session() as session:
+        statement = select(Merchant).where(Merchant.merchant_name == merchant_name)
+        result = await session.execute(statement)
+        merch = result.scalars().one_or_none()
+        if not merch:
+            raise HTTPException(status_code=404, detail='Merchant not found')
+        return MerchantResponse.model_validate(merch)
+
+
+@app.put('/merchants/{merchant_id}', tags=['Merchants'], response_model=MerchantResponse)
+async def update_merchant(
+    merchant_id: int, payload: MerchantRequest
+) -> MerchantResponse:
+    """
+    Update a merchant.
+    Args:
+        merchant_id: ID of the merchant to update
+        payload: Updated merchant data
+    Returns:
+        Updated merchant data
+    """
+    async with get_async_session() as session:
+        statement = select(Merchant).where(Merchant.merchant_id == merchant_id)
+        result = await session.execute(statement)
+        merch = result.scalars().one_or_none()
+        if not merch:
+            raise HTTPException(status_code=404, detail='Merchant not found')
+
+        for key, value in payload.model_dump().items():
+            if hasattr(merch, key):
+                setattr(merch, key, value)
+
+        await session.commit()
+        await session.refresh(merch)
+        return MerchantResponse.model_validate(merch)
+
+
+@app.delete('/merchants/{merchant_id}', tags=['Merchants'])
+async def delete_merchant(merchant_id: int) -> dict:
+    """
+    Delete a merchant.
+    Args:
+        merchant_id: ID of the merchant to delete
+    Returns:
+        Deletion status
+    """
+    async with get_async_session() as session:
+        statement = select(Merchant).where(Merchant.merchant_id == merchant_id)
+        result = await session.execute(statement)
+        merch = result.scalars().one_or_none()
+        if not merch:
+            raise HTTPException(status_code=404, detail='Merchant not found')
+
+        await session.delete(merch)
+        await session.commit()
+        return {'status': 'success', 'message': 'Merchant deleted'}
 
 
 if __name__ == '__main__':
