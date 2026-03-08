@@ -70,6 +70,24 @@ class Checkpoint(SQLModel, table=True):
     checkpoint: str
 
 
+class Category(SQLModel, table=True):
+    load_time: datetime = Field(default_factory=datetime.utcnow)
+    load_by: str | None = None
+    category_id: int | None = Field(default=None, primary_key=True)
+    category_name: str
+    category_description: str | None = None
+    comments: str | None = None
+
+
+class Merchant(SQLModel, table=True):
+    load_time: datetime = Field(default_factory=datetime.utcnow)
+    load_by: str | None = None
+    merchant_id: int | None = Field(default=None, primary_key=True)
+    merchant_name: str
+    merchant_description: str | None = None
+    comments: str | None = None
+
+
 # API request/response models
 class TransactionRequest(BaseModel):
     load_by: str | None = None
