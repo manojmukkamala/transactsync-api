@@ -423,7 +423,7 @@ async def delete_email_checkpoint(folder: str) -> dict:
 
 # checkpoints endpoints
 @app.get(
-    '/checkpoints/{identifier}',
+    '/checkpoints/{identifier:path}',
     tags=['Checkpoints'],
     response_model=CheckpointResponse,
 )
@@ -462,7 +462,7 @@ async def get_all_checkpoints() -> list[CheckpointResponse]:
 
 
 @app.put(
-    '/checkpoints/{identifier}',
+    '/checkpoints/{identifier:path}',
     tags=['Checkpoints'],
     response_model=CheckpointResponse,
 )
@@ -529,7 +529,7 @@ async def create_checkpoint(
         return CheckpointResponse.model_validate(cp)
 
 
-@app.delete('/checkpoints/{identifier}', tags=['Checkpoints'])
+@app.delete('/checkpoints/{identifier:path}', tags=['Checkpoints'])
 async def delete_checkpoint(identifier: str) -> dict:
     """
     Delete an  checkpoint by identifier.
