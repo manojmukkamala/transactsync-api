@@ -5,7 +5,7 @@
 ### GET
 
 ```sh
-curl -H "x-api-key: super-secret" -X 'GET' 'http://127.0.0.1:8000/accounts/1'  -H 'accept: application/json'  | jq 
+curl -H "x-api-key: super-secret" -X 'GET' 'http://127.0.0.1:8000/accounts'  -H 'accept: application/json'  | jq 
 ```
 
 ### GET by account number
@@ -192,9 +192,9 @@ curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/cycles" \
   -H "accept: application/json" \
   -H "Content-Type: application/json" \
   -d '{
-    "cycle_start": "2026-01-01T00:00:00",
-    "cycle_end": "2026-01-31T23:59:59",
-    "cycle_description": "January cycle",
+    "cycle_start": "2025-01-01T00:00:00",
+    "cycle_end": "2025-12-31T23:59:59",
+    "cycle_description": "Random cycle",
     "comments": "Auto-created"
   }' | jq
 # Example response:
@@ -280,17 +280,13 @@ curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/transactions" \
     "transaction_amount": 150.00,
     "merchant": "Starbucks",
     "account_id": 1,
-    "from_address": "noreply@starbucks.com",
-    "to_address": "user@example.com",
-    "email_uid": 100,
-    "email_date": "2026-01-15T10:30:00",
-    "transaction_type": "purchase",
+    "transaction_type": "debit",
     "cycle_id": 1,
     "is_budgeted": 0,
     "is_deleted": 0
   }' | jq
 # Example response:
-# {"transaction_id":1,"transaction_date":"2026-01-15T10:30:00","transaction_amount":150.0,"merchant":"Starbucks","account_id":1,"from_address":"noreply@starbucks.com","to_address":"user@example.com","email_uid":100,"email_date":"2026-01-15T10:30:00","transaction_type":"purchase","cycle_id":1,...}
+# {"transaction_id":1,"transaction_date":"2026-01-15T10:30:00","transaction_amount":150.0,"merchant":"Starbucks","account_id":1,"transaction_type":"debit","cycle_id":1,...}
 ```
 
 ### GET (by id)
@@ -298,7 +294,7 @@ curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/transactions" \
 ```sh
 curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/transactions/1" -H "accept: application/json" | jq
 # Example response:
-# {"transaction_id":1,"transaction_date":"2026-01-15T10:30:00","transaction_amount":150.0,"merchant":"Starbucks","account_id":1,"from_address":"noreply@starbucks.com","to_address":"user@example.com","email_uid":100,"email_date":"2026-01-15T10:30:00","transaction_type":"purchase","cycle_id":1,...}
+# {"transaction_id":1,"transaction_date":"2026-01-15T10:30:00","transaction_amount":150.0,"merchant":"Starbucks","account_id":1,"transaction_type":"debit","cycle_id":1,...}
 ```
 
 ### PUT
@@ -312,10 +308,6 @@ curl -H "x-api-key: super-secret" -X PUT "http://127.0.0.1:8000/transactions/1" 
     "transaction_amount": 175.00,
     "merchant": "Starbucks",
     "account_id": 1,
-    "from_address": "noreply@starbucks.com",
-    "to_address": "user@example.com",
-    "email_uid": 100,
-    "email_date": "2026-01-15T10:30:00",
     "transaction_type": "purchase",
     "cycle_id": 1,
     "is_budgeted": 0,

@@ -423,7 +423,7 @@ async def delete_email_checkpoint(folder: str) -> dict:
 
 # checkpoints endpoints
 @app.get(
-    '/checkpoints/{identifier}',
+    '/checkpoints/{identifier:path}',
     tags=['Checkpoints'],
     response_model=CheckpointResponse,
 )
@@ -462,7 +462,7 @@ async def get_all_checkpoints() -> list[CheckpointResponse]:
 
 
 @app.put(
-    '/checkpoints/{identifier}',
+    '/checkpoints/{identifier:path}',
     tags=['Checkpoints'],
     response_model=CheckpointResponse,
 )
@@ -529,7 +529,7 @@ async def create_checkpoint(
         return CheckpointResponse.model_validate(cp)
 
 
-@app.delete('/checkpoints/{identifier}', tags=['Checkpoints'])
+@app.delete('/checkpoints/{identifier:path}', tags=['Checkpoints'])
 async def delete_checkpoint(identifier: str) -> dict:
     """
     Delete an  checkpoint by identifier.
@@ -972,7 +972,7 @@ async def get_latest_email_by_folder(folder: str) -> EmailResponse:
             raise HTTPException(status_code=404, detail='Email not found')
         return EmailResponse.model_validate(email)
 
-        
+
 @app.get('/emails/uid/{email_uid}', tags=['Emails'], response_model=EmailResponse)
 async def get_email_by_uid(email_uid: int) -> EmailResponse:
     """
@@ -1084,7 +1084,9 @@ async def get_file_by_id(file_id: int) -> FileResponse:
         return FileResponse.model_validate(file)
 
 
-@app.get('/files/path/latest/{file_path:path}', tags=['Files'], response_model=FileResponse)
+@app.get(
+    '/files/path/latest/{file_path:path}', tags=['Files'], response_model=FileResponse
+)
 async def get_latest_file_by_path(file_path: str) -> FileResponse:
     """
     Get the latest file (by file_created_at) for a given file_path.
@@ -1104,10 +1106,12 @@ async def get_latest_file_by_path(file_path: str) -> FileResponse:
         file = result.scalars().one_or_none()
         if not file:
             raise HTTPException(status_code=404, detail='File not found')
-        return FileResponse.model_validate(file)        
+        return FileResponse.model_validate(file)
 
 
-@app.get('/files/path/{file_path:path}', tags=['Files'], response_model=list[FileResponse])
+@app.get(
+    '/files/path/{file_path:path}', tags=['Files'], response_model=list[FileResponse]
+)
 async def get_files_by_path(file_path: str) -> list[FileResponse]:
     """
     Get all files for a given file_path.
