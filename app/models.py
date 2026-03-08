@@ -23,23 +23,21 @@ class Transaction(SQLModel, table=True):
     load_by: str | None = None
     transaction_id: int | None = Field(default=None, primary_key=True)
     transaction_date: datetime
+    transaction_type: str | None = None
     transaction_amount: float
     merchant: str | None = None
     category: str | None = None
     account_id: int = Field(foreign_key='account.account_id')
+    cycle_id: int | None = Field(default=None, foreign_key='cycle.cycle_id')
+    email_id: int | None = Field(default=None, foreign_key='email.email_id')
+    file_id: int | None = Field(default=None, foreign_key='file.file_id')
     expense_owner: str | None = None
-    from_address: str | None = None
-    to_address: str | None = None
-    email_uid: int | None = None
-    email_date: datetime | None = None
     llm_reasoning: str | None = None
-    is_deleted: bool = False
     comment: str | None = None
     updated_by: str | None = None
     updated_at: datetime | None = None
-    transaction_type: str | None = None
-    cycle_id: int | None = Field(default=None, foreign_key='cycle.cycle_id')
     is_budgeted: bool = False
+    is_deleted: bool = False
 
 
 class Email(SQLModel, table=True):
@@ -114,47 +112,42 @@ class Merchant(SQLModel, table=True):
 class TransactionRequest(BaseModel):
     load_by: str | None = None
     transaction_date: datetime
+    transaction_type: str | None = None
     transaction_amount: float
     merchant: str | None = None
     category: str | None = None
     account_id: int
+    cycle_id: int | None = None
+    email_id: int | None = None
+    file_id: int | None = None
     expense_owner: str | None = None
-    from_address: str | None = None
-    to_address: str | None = None
-    email_uid: int | None = None
-    email_date: datetime | None = None
     llm_reasoning: str | None = None
-    is_deleted: bool
     comment: str | None = None
     updated_by: str | None = None
     updated_at: datetime | None = None
-    transaction_type: str | None = None
-    cycle_id: int | None = None
     is_budgeted: bool
+    is_deleted: bool
 
 
 class TransactionResponse(BaseModel):
     load_by: str | None = None
     load_time: datetime | None = None
-    transaction_id: int
     transaction_date: datetime
+    transaction_type: str | None = None
     transaction_amount: float
     merchant: str | None = None
     category: str | None = None
     account_id: int
+    cycle_id: int | None = None
+    email_id: int | None = None
+    file_id: int | None = None
     expense_owner: str | None = None
-    from_address: str | None = None
-    to_address: str | None = None
-    email_uid: int | None = None
-    email_date: datetime | None = None
     llm_reasoning: str | None = None
-    is_deleted: bool
     comment: str | None = None
     updated_by: str | None = None
     updated_at: datetime | None = None
-    transaction_type: str | None = None
-    cycle_id: int | None = None
     is_budgeted: bool
+    is_deleted: bool
 
     model_config = ConfigDict(from_attributes=True)
 

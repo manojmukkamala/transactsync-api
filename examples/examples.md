@@ -280,17 +280,13 @@ curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/transactions" \
     "transaction_amount": 150.00,
     "merchant": "Starbucks",
     "account_id": 1,
-    "from_address": "noreply@starbucks.com",
-    "to_address": "user@example.com",
-    "email_uid": 100,
-    "email_date": "2026-01-15T10:30:00",
-    "transaction_type": "purchase",
+    "transaction_type": "debit",
     "cycle_id": 1,
     "is_budgeted": 0,
     "is_deleted": 0
   }' | jq
 # Example response:
-# {"transaction_id":1,"transaction_date":"2026-01-15T10:30:00","transaction_amount":150.0,"merchant":"Starbucks","account_id":1,"from_address":"noreply@starbucks.com","to_address":"user@example.com","email_uid":100,"email_date":"2026-01-15T10:30:00","transaction_type":"purchase","cycle_id":1,...}
+# {"transaction_id":1,"transaction_date":"2026-01-15T10:30:00","transaction_amount":150.0,"merchant":"Starbucks","account_id":1,"transaction_type":"debit","cycle_id":1,...}
 ```
 
 ### GET (by id)
@@ -298,7 +294,7 @@ curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/transactions" \
 ```sh
 curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/transactions/1" -H "accept: application/json" | jq
 # Example response:
-# {"transaction_id":1,"transaction_date":"2026-01-15T10:30:00","transaction_amount":150.0,"merchant":"Starbucks","account_id":1,"from_address":"noreply@starbucks.com","to_address":"user@example.com","email_uid":100,"email_date":"2026-01-15T10:30:00","transaction_type":"purchase","cycle_id":1,...}
+# {"transaction_id":1,"transaction_date":"2026-01-15T10:30:00","transaction_amount":150.0,"merchant":"Starbucks","account_id":1,"transaction_type":"debit","cycle_id":1,...}
 ```
 
 ### PUT
@@ -312,10 +308,6 @@ curl -H "x-api-key: super-secret" -X PUT "http://127.0.0.1:8000/transactions/1" 
     "transaction_amount": 175.00,
     "merchant": "Starbucks",
     "account_id": 1,
-    "from_address": "noreply@starbucks.com",
-    "to_address": "user@example.com",
-    "email_uid": 100,
-    "email_date": "2026-01-15T10:30:00",
     "transaction_type": "purchase",
     "cycle_id": 1,
     "is_budgeted": 0,
