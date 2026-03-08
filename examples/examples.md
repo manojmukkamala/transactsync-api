@@ -284,7 +284,9 @@ curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/transactions" \
     "email_uid": 100,
     "email_date": "2026-01-15T10:30:00",
     "transaction_type": "purchase",
-    "cycle_id": 1
+    "cycle_id": 1,
+    "is_budgeted": 0,
+    "is_deleted": 0
   }' | jq
 # Example response:
 # {"transaction_id":1,"transaction_date":"2026-01-15T10:30:00","transaction_amount":150.0,"merchant":"Starbucks","account_id":1,"from_address":"noreply@starbucks.com","to_address":"user@example.com","email_uid":100,"email_date":"2026-01-15T10:30:00","transaction_type":"purchase","cycle_id":1,...}
@@ -314,7 +316,9 @@ curl -H "x-api-key: super-secret" -X PUT "http://127.0.0.1:8000/transactions/1" 
     "email_uid": 100,
     "email_date": "2026-01-15T10:30:00",
     "transaction_type": "purchase",
-    "cycle_id": 1
+    "cycle_id": 1,
+    "is_budgeted": 0,
+    "is_deleted": 0    
   }' | jq
 # Example response: same as GET but with updated fields
 ```
@@ -325,4 +329,131 @@ curl -H "x-api-key: super-secret" -X PUT "http://127.0.0.1:8000/transactions/1" 
 curl -H "x-api-key: super-secret" -X DELETE "http://127.0.0.1:8000/transactions/1" -H "accept: application/json" | jq
 # Example response:
 # {"status":"success","message":"Transaction deleted"}
+```
+
+
+## categories
+
+### GET (all)
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/categories" -H "accept: application/json" | jq
+# Example response:
+# [{"category_id":1,"category_name":"Food","category_description":"Groceries and dining","comments":null,"load_time":null,"load_by":null}]
+```
+
+### POST (create)
+
+```sh
+curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/categories" \
+  -H "accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "category_name": "Entertainment",
+    "category_description": "Movies, concerts, etc.",
+    "comments": "For leisure activities"
+  }' | jq
+# Example response:
+# {"category_id":2,"category_name":"Entertainment","category_description":"Movies, concerts, etc.","comments":"For leisure activities","load_time":null,"load_by":null}
+```
+
+### GET (by id)
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/categories/1" -H "accept: application/json" | jq
+# Example response:
+# {"category_id":1,"category_name":"Food","category_description":"Groceries and dining","comments":null,"load_time":null,"load_by":null}
+```
+
+### GET (by name)
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/categories/name/Entertainment" -H "accept: application/json" | jq
+# Example response:
+# {"category_id":2,"category_name":"Entertainment","category_description":"Movies, concerts, etc.","comments":"For leisure activities","load_time":null,"load_by":null}
+```
+
+### PUT
+
+```sh
+curl -H "x-api-key: super-secret" -X PUT "http://127.0.0.1:8000/categories/1" \
+  -H "accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "category_name": "Food",
+    "category_description": "Groceries, dining and beverages",
+    "comments": "Updated description"
+  }' | jq
+# Example response: same as GET but with updated fields
+```
+
+### DELETE
+
+```sh
+curl -H "x-api-key: super-secret" -X DELETE "http://127.0.0.1:8000/categories/1" -H "accept: application/json" | jq
+# Example response:
+# {"status":"success","message":"Category deleted"}
+```
+
+## merchants
+
+### GET (all)
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/merchants" -H "accept: application/json" | jq
+# Example response:
+# [{"merchant_id":1,"merchant_name":"Starbucks","merchant_description":"Coffee shop","comments":null,"load_time":null,"load_by":null}]
+```
+
+### POST (create)
+
+```sh
+curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/merchants" \
+  -H "accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "merchant_name": "Amazon",
+    "merchant_description": "Online retailer",
+    "comments": "For shopping"
+  }' | jq
+# Example response:
+# {"merchant_id":2,"merchant_name":"Amazon","merchant_description":"Online retailer","comments":"For shopping","load_time":null,"load_by":null}
+```
+
+### GET (by id)
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/merchants/1" -H "accept: application/json" | jq
+# Example response:
+# {"merchant_id":1,"merchant_name":"Starbucks","merchant_description":"Coffee shop","comments":null,"load_time":null,"load_by":null}
+```
+
+### GET (by name)
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/merchants/name/Amazon" -H "accept: application/json" | jq
+# Example response:
+# {"merchant_id":2,"merchant_name":"Amazon","merchant_description":"For shopping","comments":"Retail","load_time":null,"load_by":null}
+```
+
+### PUT
+
+```sh
+curl -H "x-api-key: super-secret" -X PUT "http://127.0.0.1:8000/merchants/1" \
+  -H "accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "merchant_name": "Starbucks",
+    "merchant_description": "Coffee shop and bakery",
+    "comments": "Updated description"
+  }' | jq
+# Example response: same as GET but with updated fields
+```
+
+### DELETE
+
+```sh
+curl -H "x-api-key: super-secret" -X DELETE "http://127.0.0.1:8000/merchants/1" -H "accept: application/json" | jq
+# Example response:
+# {"status":"success","message":"Merchant deleted"}
 ```
