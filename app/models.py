@@ -42,6 +42,28 @@ class Transaction(SQLModel, table=True):
     is_budgeted: bool = False
 
 
+class Email(SQLModel, table=True):
+    __table_args__ = (UniqueConstraint('email_uid', 'folder'),)
+    load_time: datetime = Field(default_factory=datetime.utcnow)
+    load_by: str | None = None
+    email_id: int | None = Field(default=None, primary_key=True)
+    email_uid: int
+    folder: str
+    from_address: str | None = None
+    to_address: str | None = None
+    email_date: datetime | None = None
+
+
+class File(SQLModel, table=True):
+    __table_args__ = (UniqueConstraint('file_name', 'file_path'),)
+    load_time: datetime = Field(default_factory=datetime.utcnow)
+    load_by: str | None = None
+    file_id: int | None = Field(default=None, primary_key=True)
+    file_name: str
+    file_path: str
+    file_created_at: datetime | None = None
+
+
 class Cycle(SQLModel, table=True):
     load_time: datetime = Field(default_factory=datetime.utcnow)
     load_by: str | None = None
@@ -113,6 +135,7 @@ class TransactionRequest(BaseModel):
 
 class TransactionResponse(BaseModel):
     load_by: str | None = None
+    load_time: datetime | None = None
     transaction_id: int
     transaction_date: datetime
     transaction_amount: float
@@ -137,6 +160,7 @@ class TransactionResponse(BaseModel):
 
 
 class AccountRequest(BaseModel):
+    load_by: str | None = None
     account_number: str
     financial_institution: str
     account_name: str
@@ -149,6 +173,8 @@ class AccountRequest(BaseModel):
 
 
 class AccountResponse(BaseModel):
+    load_by: str | None = None
+    load_time: datetime | None = None
     account_id: int
     account_number: str
     financial_institution: str
@@ -171,6 +197,8 @@ class EmailCheckpointCreate(BaseModel):
 
 
 class EmailCheckpointResponse(BaseModel):
+    load_by: str | None = None
+    load_time: datetime | None = None
     id: int | None = None
     folder: str
     last_seen_uid: int | None = None
@@ -188,6 +216,8 @@ class CheckpointCreate(BaseModel):
 
 
 class CheckpointResponse(BaseModel):
+    load_by: str | None = None
+    load_time: datetime | None = None
     id: int | None = None
     identifier: str
     checkpoint: str | None = None
@@ -196,6 +226,7 @@ class CheckpointResponse(BaseModel):
 
 
 class CycleRequest(BaseModel):
+    load_by: str | None = None
     cycle_start: datetime
     cycle_end: datetime
     cycle_description: str | None = None
@@ -203,6 +234,8 @@ class CycleRequest(BaseModel):
 
 
 class CycleResponse(BaseModel):
+    load_by: str | None = None
+    load_time: datetime | None = None
     cycle_id: int
     cycle_start: datetime
     cycle_end: datetime
@@ -223,13 +256,16 @@ class AccountIdResponse(BaseModel):
 
 
 class CategoryRequest(BaseModel):
+    load_by: str | None = None
     category_name: str
     category_description: str | None = None
     comments: str | None = None
 
 
 class CategoryResponse(BaseModel):
-    category_id: int | None = None
+    load_by: str | None = None
+    load_time: datetime | None = None
+    category_id: int
     category_name: str
     category_description: str | None = None
     comments: str | None = None
@@ -238,15 +274,58 @@ class CategoryResponse(BaseModel):
 
 
 class MerchantRequest(BaseModel):
+    load_by: str | None = None
     merchant_name: str
     merchant_description: str | None = None
     comments: str | None = None
 
 
 class MerchantResponse(BaseModel):
-    merchant_id: int | None = None
+    load_by: str | None = None
+    load_time: datetime | None = None
+    merchant_id: int
     merchant_name: str
     merchant_description: str | None = None
     comments: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class EmailRequest(BaseModel):
+    load_by: str | None = None
+    email_uid: int
+    folder: str
+    from_address: str | None = None
+    to_address: str | None = None
+    email_date: datetime | None = None
+
+
+class EmailResponse(BaseModel):
+    load_by: str | None = None
+    load_time: datetime | None = None
+    email_id: int
+    email_uid: int
+    folder: str
+    from_address: str | None = None
+    to_address: str | None = None
+    email_date: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class FileRequest(BaseModel):
+    load_by: str | None = None
+    file_name: str
+    file_path: str
+    file_created_at: datetime | None = None
+
+
+class FileResponse(BaseModel):
+    load_by: str | None = None
+    load_time: datetime | None = None
+    file_id: int
+    file_name: str
+    file_path: str
+    file_created_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)

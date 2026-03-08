@@ -9,7 +9,9 @@ from .models import (
     Category,
     Checkpoint,
     Cycle,
+    Email,
     EmailCheckpoint,
+    File,
     Merchant,
     Transaction,
 )
@@ -50,6 +52,8 @@ async def init_db() -> None:
         await conn.run_sync(Category.metadata.create_all)
         await conn.run_sync(Checkpoint.metadata.create_all)
         await conn.run_sync(Cycle.metadata.create_all)
+        await conn.run_sync(Email.metadata.create_all)
         await conn.run_sync(EmailCheckpoint.metadata.create_all)
         await conn.run_sync(Merchant.metadata.create_all)
         await conn.run_sync(Transaction.metadata.create_all)
+        await conn.run_sync(File.metadata.create_all)
