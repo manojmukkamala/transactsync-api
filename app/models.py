@@ -136,6 +136,7 @@ class TransactionRequest(BaseModel):
 class TransactionResponse(BaseModel):
     load_by: str | None = None
     load_time: datetime | None = None
+    transaction_id: int
     transaction_date: datetime
     transaction_type: str | None = None
     transaction_amount: float
