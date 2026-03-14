@@ -974,7 +974,13 @@ async def get_latest_email_by_folder(folder: str) -> EmailResponse:
 
 
 @app.get('/emails/uid/{email_uid}', tags=['Emails'], response_model=EmailResponse)
-async def get_email_by_uid(email_uid: int) -> EmailResponse:
+async def get_email_by_uid(
+    email_uid: int,
+    folder: str | None = None,
+    from_address: str | None = None,
+    to_address: str | None = None,
+    email_date: datetime | None = None,
+) -> EmailResponse:
     """
     Get an email by email_uid.
     Args:
@@ -984,6 +990,14 @@ async def get_email_by_uid(email_uid: int) -> EmailResponse:
     """
     async with get_async_session() as session:
         statement = select(Email).where(Email.email_uid == email_uid)
+        if folder is not None:
+            statement = statement.where(Email.folder == folder)
+        if from_address is not None:
+            statement = statement.where(Email.from_address == from_address)
+        if to_address is not None:
+            statement = statement.where(Email.to_address == to_address)
+        if email_date is not None:
+            statement = statement.where(Email.email_date == email_date)
         result = await session.execute(statement)
         email = result.scalars().one_or_none()
         if not email:
@@ -1125,6 +1139,31 @@ async def get_files_by_path(file_path: str) -> list[FileResponse]:
         result = await session.execute(statement)
         files = result.scalars().all()
         return [FileResponse.model_validate(f) for f in files]
+
+
+@app.get(
+    '/files/path-name/{file_path:path}/{file_name}',
+    tags=['Files'],
+    response_model=FileResponse,
+)
+async def get_file_by_path_and_name(file_path: str, file_name: str) -> FileResponse:
+    """
+    Get a file by both file_path and file_name.
+    Args:
+        file_path: Path of the file
+        file_name: Name of the file
+    Returns:
+        File data matching the path and name
+    """
+    async with get_async_session() as session:
+        statement = select(File).where(
+            File.file_path == file_path, File.file_name == file_name
+        )
+        result = await session.execute(statement)
+        file = result.scalars().one_or_none()
+        if not file:
+            raise HTTPException(status_code=404, detail='File not found')
+        return FileResponse.model_validate(file)
 
 
 @app.put('/files/{file_id}', tags=['Files'], response_model=FileResponse)
