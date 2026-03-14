@@ -192,8 +192,8 @@ curl -H "x-api-key: super-secret" -X POST "http://127.0.0.1:8000/cycles" \
   -H "accept: application/json" \
   -H "Content-Type: application/json" \
   -d '{
-    "cycle_start": "2025-01-01T00:00:00",
-    "cycle_end": "2025-12-31T23:59:59",
+    "cycle_start": "2026-01-01T00:00:00",
+    "cycle_end": "2026-12-31T23:59:59",
     "cycle_description": "Random cycle",
     "comments": "Auto-created"
   }' | jq
@@ -487,10 +487,22 @@ curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/emails/1" -H "ac
 # {"email_id":1,"email_uid":12345,"folder":"INBOX","from_address":"sender@example.com","to_address":"recipient@example.com","email_date":"2026-01-15T10:30:00","load_time":null,"load_by":null}
 ```
 
-### GET (by uid)
+### GET (by uid and parameters)
 
 ```sh
 curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/emails/uid/54321" -H "accept: application/json" | jq
+# Example response:
+# {"email_id":2,"email_uid":54321,"folder":"INBOX","from_address":"noreply@bank.com","to_address":"user@example.com","email_date":"2026-01-15T10:30:00","load_time":null,"load_by":null}
+```
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/emails/uid/54321?folder=INBOX" -H "accept: application/json" | jq
+# Example response:
+# {"email_id":2,"email_uid":54321,"folder":"INBOX","from_address":"noreply@bank.com","to_address":"user@example.com","email_date":"2026-01-15T10:30:00","load_time":null,"load_by":null}
+```
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/emails/uid/54321?folder=INBOX&from_address=noreply@bank.com" -H "accept: application/json" | jq
 # Example response:
 # {"email_id":2,"email_uid":54321,"folder":"INBOX","from_address":"noreply@bank.com","to_address":"user@example.com","email_date":"2026-01-15T10:30:00","load_time":null,"load_by":null}
 ```
@@ -573,6 +585,14 @@ curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/files/path//repo
 
 ```sh
 curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/files/path/latest//reports/2026/01" -H "accept: application/json" | jq
+# Example response:
+# {"file_id":1,"file_name":"transaction_report_2026-01-15.csv","file_path":"/reports/2026/01","file_created_at":"2026-01-15T10:30:00","load_time":null,"load_by":null}
+```
+
+### GET (by path and name)
+
+```sh
+curl -H "x-api-key: super-secret" -X GET "http://127.0.0.1:8000/files/path-name//reports/2026/01/transaction_report_2026-01-15.csv" -H "accept: application/json" | jq
 # Example response:
 # {"file_id":1,"file_name":"transaction_report_2026-01-15.csv","file_path":"/reports/2026/01","file_created_at":"2026-01-15T10:30:00","load_time":null,"load_by":null}
 ```
