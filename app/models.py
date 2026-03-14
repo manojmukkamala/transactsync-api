@@ -41,7 +41,11 @@ class Transaction(SQLModel, table=True):
 
 
 class Email(SQLModel, table=True):
-    __table_args__ = (UniqueConstraint('email_uid', 'folder'),)
+    __table_args__ = (
+        UniqueConstraint(
+            'email_uid', 'folder', 'from_address', 'to_address', 'email_date'
+        ),
+    )
     load_time: datetime = Field(default_factory=datetime.utcnow)
     load_by: str | None = None
     email_id: int | None = Field(default=None, primary_key=True)
